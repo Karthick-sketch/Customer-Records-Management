@@ -1,5 +1,7 @@
 package com.karthick.customerrecordsmanagement.service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.karthick.customerrecordsmanagement.entity.CustomerRecord;
 import com.karthick.customerrecordsmanagement.repository.CustomerRecordRepository;
 import com.opencsv.CSVReader;
@@ -9,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CustomerRecordService {
@@ -25,49 +29,21 @@ public class CustomerRecordService {
     }
 
     public void upload(String fileName) {
-        List<String[]> splitData = readCsvFile(getFilePath(fileName));
-        String[] titles = splitData.remove(0);
-        for (String[] record : splitData) {
-            pushRecordsToDb(titles, record);
+        List<String[]> csvRecords = readCsvFile(getFilePath(fileName));
+        String[] headers = csvRecords.remove(0);
+        for (String[] record : csvRecords) {
+            pushRecordsToDb(headers, record);
         }
     }
 
-    private void pushRecordsToDb(String[] titles, String[] record) {
-        CustomerRecord customerRecord = new CustomerRecord();
-        for (int i = 0; i < titles.length; i++) {
-            switch (titles[i]) {
-                case "first_name":
-                    customerRecord.setFirstName(record[i]);
-                    break;
-                case "last_name":
-                    customerRecord.setLastName(record[i]);
-                    break;
-                case "email":
-                    customerRecord.setEmail(record[i]);
-                    break;
-                case "phone_number":
-                    customerRecord.setPhoneNumber(record[i]);
-                    break;
-                case "company_name":
-                    customerRecord.setCompanyName(record[i]);
-                    break;
-                case "address":
-                    customerRecord.setAddress(record[i]);
-                    break;
-                case "city":
-                    customerRecord.setCity(record[i]);
-                    break;
-                case "state":
-                    customerRecord.setState(record[i]);
-                    break;
-                case "country":
-                    customerRecord.setCountry(record[i]);
-                    break;
-                case "zipcode":
-                    customerRecord.setZipcode(Integer.parseInt(record[i]));
-                    break;
-            }
+    private void pushRecordsToDb(String[] headers, String[] record) {
+        Map<String, String> recordMap = new HashMap<>();
+        for (int i = 0; i < headers.length && i < record.length; i++) {
+            recordMap.put(headers[i], record[i]);
         }
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        CustomerRecord customerRecord = objectMapper.convertValue(recordMap, CustomerRecord.class);
         customerRecordRepository.save(customerRecord);
     }
 
