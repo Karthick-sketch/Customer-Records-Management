@@ -4,28 +4,24 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.karthick.customerrecordsmanagement.entity.CsvFileDetail;
 import com.karthick.customerrecordsmanagement.entity.CustomerRecord;
+import com.karthick.customerrecordsmanagement.exception.BadRequestException;
 import com.karthick.customerrecordsmanagement.repository.CsvFileDetailRepository;
 import com.karthick.customerrecordsmanagement.repository.CustomerRecordRepository;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Service
+@AllArgsConstructor
 public class CustomerRecordService {
-    @Autowired
     private CustomerRecordRepository customerRecordRepository;
-
-    @Autowired
     private CsvFileDetailRepository csvFileDetailRepository;
 
     private final Logger logger = Logger.getLogger(CustomerRecord.class.getName());
@@ -39,19 +35,22 @@ public class CustomerRecordService {
     }
 
     public void uploadCsvFile(MultipartFile file) {
-        String filePath = getFilePath(file.getOriginalFilename());
-        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
-            fileOutputStream.write(file.getBytes());
-            CsvFileDetail csvFileDetail = new CsvFileDetail(file.getOriginalFilename(), file.getContentType(), filePath);
-            csvFileDetailRepository.save(csvFileDetail);
-            logger.info(file.getOriginalFilename() + " file upload");
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
+        if (Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
+            String filePath = getFilePath(file.getOriginalFilename());
+            try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
+                fileOutputStream.write(file.getBytes());
+                CsvFileDetail csvFileDetail = new CsvFileDetail(file.getOriginalFilename(), file.getContentType(), filePath);
+                csvFileDetailRepository.save(csvFileDetail);
+                logger.info(file.getOriginalFilename() + " file upload");
+            } catch (IOException e) {
+                logger.severe(e.getMessage());
+            }
+        } else {
+            throw new BadRequestException("Only CSV files are allowed");
         }
     }
 
     public void uploadCsvFileDataToDb(String fileName) {
-        logger.info("Started to upload data from file to database");
         Optional<CsvFileDetail> file = csvFileDetailRepository.findByFileName(fileName);
         if (file.isPresent()) {
             String filePath = file.get().getFilePath();
@@ -64,7 +63,7 @@ public class CustomerRecordService {
                 System.out.println("Failed to delete the file");
             }
         } else {
-            throw new RuntimeException("file path not found");
+            throw new NoSuchElementException("file path not found");
         }
     }
 
