@@ -1,4 +1,4 @@
-firstName,lastName,companyName,address,city,county,state,zip,phone,email
+firstName,lastName,companyName,address,city,country,state,zipcode,phoneNumber,email
 James,Butt,"Benton, John B Jr",6649 N Blue Gum St,New Orleans,Orleans,LA,70116,504-845-1427,jbutt@gmail.com
 Josephine,Darakjy,"Chanay, Jeffrey A Esq",4 B Blue Ridge Blvd,Brighton,Livingston,MI,48116,810-374-9840,josephine_darakjy@darakjy.org
 Art,Venere,"Chemel, James L Cpa",8 W Cerritos Ave #54,Bridgeport,Gloucester,NJ,8014,856-264-4130,art@venere.org
@@ -19,7 +19,7 @@ Meaghan,Garufi,"Bolton, Wilbur Esq",69734 E Carrillo St,Mc Minnville,Warren,TN,3
 Gladys,Rim,T M Byxbee Company Pc,322 New Horizon Blvd,Milwaukee,Milwaukee,WI,53207,414-377-2880,gladys.rim@rim.org
 Yuki,Whobrey,Farmers Insurance Group,1 State Route 27,Taylor,Wayne,MI,48180,313-341-4470,yuki_whobrey@aol.com
 Fletcher,Flosi,Post Box Services Plus,394 Manchester Blvd,Rockford,Winnebago,IL,61109,815-426-5657,fletcher.flosi@yahoo.com
-Bette,Nicka,Sport En Art,6 S 33rd St,Aston,Delaware,PA,19014,610-492-4643,betteNicka@cox.net
+Bette,Nicka,Sport En Art,6 S 33rd St,Aston,Delaware,PA,19014,610-492-4643,bette_nicka@cox.net
 Veronika,Inouye,C 4 Network Inc,6 Greenleaf Ave,San Jose,Santa Clara,CA,95111,408-813-4592,vinouye@aol.com
 Willard,Kolmetz,"Ingalls, Donald R Esq",618 W Yakima Ave,Irving,Dallas,TX,75062,972-896-4882,willard@hotmail.com
 Maryann,Royster,"Franklin, Peter L Esq",74 S Westgate St,Albany,Albany,NY,12204,518-448-8982,mroyster@royster.com

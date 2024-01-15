@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/record")
@@ -25,9 +27,14 @@ public class CustomerRecordsController {
         return new ResponseEntity<>(customerRecordService.createNewCustomerRecord(customerRecord), HttpStatus.CREATED);
     }
 
-    @GetMapping("/upload")
-    public ResponseEntity<HttpStatus> uploadCsvFile() {
-        customerRecordService.upload("10-contacts.csv");
-        return new ResponseEntity<>(HttpStatus.OK);
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadCsvFile(@RequestPart("file") MultipartFile file) {
+        if (Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
+            customerRecordService.uploadCsvFile(file);
+            customerRecordService.uploadCsvFileDataToDb(file.getOriginalFilename());
+            return new ResponseEntity<>("File uploaded successfully!", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Only CSV files are allowed", HttpStatus.BAD_REQUEST);
+        }
     }
 }
