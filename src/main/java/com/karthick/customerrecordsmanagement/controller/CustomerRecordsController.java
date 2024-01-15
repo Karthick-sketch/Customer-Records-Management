@@ -24,4 +24,10 @@ public class CustomerRecordsController {
     public ResponseEntity<CustomerRecord> createCustomerRecord(@RequestBody CustomerRecord customerRecord) {
         return new ResponseEntity<>(customerRecordService.createNewCustomerRecord(customerRecord), HttpStatus.CREATED);
     }
+
+    @GetMapping("/upload")
+    public ResponseEntity<HttpStatus> uploadCsvFile() {
+        customerRecordService.upload("10-contacts.csv");
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
