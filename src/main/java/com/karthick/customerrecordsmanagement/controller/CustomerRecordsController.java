@@ -28,7 +28,6 @@ public class CustomerRecordsController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadCsvFile(@RequestPart("file") MultipartFile file) {
         customerRecordService.uploadCsvFile(file);
-        customerRecordService.uploadCsvFileDataToDb(file.getOriginalFilename());
-        return new ResponseEntity<>("File uploaded successfully!", HttpStatus.OK);
+        return new ResponseEntity<>("File uploaded successfully, your data will be processed in a moment", HttpStatus.OK);
     }
 }
