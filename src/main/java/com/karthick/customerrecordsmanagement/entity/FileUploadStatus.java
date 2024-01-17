@@ -6,21 +6,22 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
-@Entity(name = "csv_file_details")
+@Entity(name = "file_upload_status")
 @Data
 @NoArgsConstructor
-public class CsvFileDetail {
+@RequiredArgsConstructor
+public class FileUploadStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @NonNull
     private String fileName;
-    private String contentType;
-    private String filePath;
-
-    public CsvFileDetail(String fileName, String contentType, String filePath) {
-        this.fileName = fileName;
-        this.contentType = contentType;
-        this.filePath = filePath;
-    }
+    private boolean status = true;
+    private int totalRecords = 0;
+    private int uploadedRecords = 0;
+    private int duplicateRecords = 0;
+    private int invalidRecords = 0;
 }

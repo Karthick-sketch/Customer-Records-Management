@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 public class CustomerRecordService {
     private CustomerRecordRepository customerRecordRepository;
     private CsvFileDetailRepository csvFileDetailRepository;
-    private KafkaMessageService kafkaMessageService;
+    private FileProcessService fileProcessService;
 
     private final Logger logger = Logger.getLogger(CustomerRecordService.class.getName());
 
@@ -41,7 +41,7 @@ public class CustomerRecordService {
                 fileOutputStream.write(file.getBytes());
                 CsvFileDetail csvFileDetail = new CsvFileDetail(file.getOriginalFilename(), file.getContentType(), filePath);
                 csvFileDetailRepository.save(csvFileDetail);
-                kafkaMessageService.publishKafkaMessage(Constants.KAFKA_MESSAGE_PREFIX + file.getOriginalFilename());
+                fileProcessService.publishKafkaMessage(csvFileDetail.getId(), csvFileDetail.getFileName());
                 logger.info(file.getOriginalFilename() + " file upload");
             } catch (IOException e) {
                 logger.severe(e.getMessage());
