@@ -39,6 +39,23 @@ public class FileProcessService {
 
     private final Logger logger = Logger.getLogger(FileProcessService.class.getName());
 
+    public List<FileUploadStatus> findAllFileUploadStatus() {
+        return fileUploadStatusRepository.findAll();
+    }
+
+    public FileUploadStatus findFileUploadStatusById(long id) {
+        Optional<FileUploadStatus> fileUploadStatus = fileUploadStatusRepository.findById(id);
+        if (fileUploadStatus.isPresent()) {
+            return fileUploadStatus.get();
+        } else {
+            throw new NoSuchElementException("The uploaded file status with the Id of " + id + " is not found");
+        }
+    }
+
+    public void createNewFileUploadStatus(FileUploadStatus fileUploadStatus) {
+        fileUploadStatusRepository.save(fileUploadStatus);
+    }
+
     public void publishKafkaMessage(long fileId, String fileName) {
         FileUploadEvent fileUploadEvent = new FileUploadEvent(fileId, fileName);
         CompletableFuture<SendResult<String, FileUploadEvent>> future = kafkaTemplate.send(Constants.TOPIC, fileUploadEvent);
@@ -52,51 +69,47 @@ public class FileProcessService {
     }
 
     @KafkaListener(topics = Constants.TOPIC, containerFactory = "kafkaListenerContainerFactory")
-    public void receiveKafkaMessage(FileUploadEvent fileUploadEvent) {
-        uploadCsvFileDataToDb(fileUploadEvent.getFileId());
-    }
-
-    public void createNewFileUploadStatus(FileUploadStatus fileUploadStatus) {
-        fileUploadStatusRepository.save(fileUploadStatus);
-    }
-
-    public void uploadCsvFileDataToDb(long fileId) {
-        Optional<CsvFileDetail> file = csvFileDetailRepository.findById(fileId);
-        if (file.isPresent()) {
-            String fileName = file.get().getFileName();
+    public void pushCustomerRecordsFromFileToDatabase(FileUploadEvent fileUploadEvent) {
+        String fileName = fileUploadEvent.getFileName();
+        Optional<CsvFileDetail> file = csvFileDetailRepository.findById(fileUploadEvent.getFileId());
+        if (file.isPresent() && fileName.equals(file.get().getFileName())) {
             String filePath = file.get().getFilePath();
-            FileUploadStatus fileUploadStatus = new FileUploadStatus(fileName);
             List<String[]> csvRecords = readCsvFile(filePath);
             if (csvRecords != null) {
-                String[] headers = csvRecords.remove(0);
-                fileUploadStatus.setTotalRecords(csvRecords.size());
-                int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
-                for (String[] record : csvRecords) {
-                    try {
-                        customerRecordRepository.save(mapTheArraysToCustomerRecord(headers, record));
-                        uploadedRecords++;
-                    } catch (DataIntegrityViolationException e) {
-                        if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
-                            duplicateRecords++;
-                        } else if (e.getCause().getClass().equals(PropertyValueException.class)) {
-                            invalidRecords++;
-                        }
-                        logger.warning(e.getMessage());
-                    }
-                }
-                fileUploadStatus.setUploadedRecords(uploadedRecords);
-                fileUploadStatus.setInvalidRecords(invalidRecords);
-                fileUploadStatus.setDuplicateRecords(duplicateRecords);
-                if (!new File(filePath).delete()) {
-                    logger.severe("Failed to delete the file");
-                }
+                createCustomerRecordsAndFileUploadStatus(fileName, csvRecords);
             } else {
                 logger.warning(fileName + " file is empty");
             }
-            createNewFileUploadStatus(fileUploadStatus);
+            if (!new File(filePath).delete()) {
+                logger.severe("Failed to delete the file");
+            }
         } else {
             throw new NoSuchElementException("file not found");
         }
+    }
+
+    private void createCustomerRecordsAndFileUploadStatus(String fileName, List<String[]> csvRecords) {
+        FileUploadStatus fileUploadStatus = new FileUploadStatus(fileName);
+        String[] headers = csvRecords.remove(0);
+        fileUploadStatus.setTotalRecords(csvRecords.size());
+        int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
+        for (String[] record : csvRecords) {
+            try {
+                customerRecordRepository.save(mapTheArraysToCustomerRecord(headers, record));
+                uploadedRecords++;
+            } catch (DataIntegrityViolationException e) {
+                if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
+                    duplicateRecords++;
+                } else if (e.getCause().getClass().equals(PropertyValueException.class)) {
+                    invalidRecords++;
+                }
+                logger.warning(e.getMessage());
+            }
+        }
+        fileUploadStatus.setUploadedRecords(uploadedRecords);
+        fileUploadStatus.setInvalidRecords(invalidRecords);
+        fileUploadStatus.setDuplicateRecords(duplicateRecords);
+        createNewFileUploadStatus(fileUploadStatus);
     }
 
     private CustomerRecord mapTheArraysToCustomerRecord(String[] headers, String[] record) {
