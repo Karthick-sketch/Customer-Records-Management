@@ -11,6 +11,9 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,8 +29,8 @@ public class CustomerRecordService {
 
     private final Logger logger = Logger.getLogger(CustomerRecord.class.getName());
 
-    public List<CustomerRecord> getAllCustomerRecords() {
-        return customerRecordRepository.findAll();
+    public Page<CustomerRecord> fetchCustomerRecordsWithPagination(int offset, int limit) {
+        return customerRecordRepository.findAll(PageRequest.of(offset, limit).withSort(Sort.by("email")));
     }
 
     public CustomerRecord createNewCustomerRecord(CustomerRecord customerRecord) {
@@ -84,10 +87,11 @@ public class CustomerRecordService {
 
     private List<String[]> readCsvFile(String file) {
         List<String[]> splitData = null;
-        try (FileReader filereader = new FileReader(file)) {
-            try (CSVReader csvReader = new CSVReaderBuilder(filereader).withSkipLines(0).build()) {
-                splitData = csvReader.readAll();
-            }
+        try {
+            FileReader filereader = new FileReader(file);
+            CSVReader csvReader = new CSVReaderBuilder(filereader).withSkipLines(0).build();
+            splitData = csvReader.readAll();
+            csvReader.close();
         } catch (IOException | CsvException e) {
             System.out.println(e.getMessage());
         }
