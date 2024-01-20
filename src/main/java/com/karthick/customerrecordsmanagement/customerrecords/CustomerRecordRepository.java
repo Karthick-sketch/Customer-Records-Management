@@ -1,6 +1,5 @@
-package com.karthick.customerrecordsmanagement.repository;
+package com.karthick.customerrecordsmanagement.customerrecords;
 
-import com.karthick.customerrecordsmanagement.entity.CustomerRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

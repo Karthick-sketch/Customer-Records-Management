@@ -1,9 +1,7 @@
-package com.karthick.customerrecordsmanagement.controller;
+package com.karthick.customerrecordsmanagement.customerrecords;
 
-import com.karthick.customerrecordsmanagement.entity.CustomerRecord;
-import com.karthick.customerrecordsmanagement.entity.FileUploadStatus;
-import com.karthick.customerrecordsmanagement.service.CustomerRecordService;
-import com.karthick.customerrecordsmanagement.service.FileProcessService;
+import com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus.FileUploadStatus;
+import com.karthick.customerrecordsmanagement.fileupload.FileProcessService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;

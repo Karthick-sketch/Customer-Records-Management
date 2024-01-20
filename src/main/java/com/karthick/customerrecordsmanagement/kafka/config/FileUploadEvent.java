@@ -1,4 +1,4 @@
-package com.karthick.customerrecordsmanagement.config;
+package com.karthick.customerrecordsmanagement.kafka.config;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

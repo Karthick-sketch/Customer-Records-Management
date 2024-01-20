@@ -1,11 +1,10 @@
-package com.karthick.customerrecordsmanagement.service;
+package com.karthick.customerrecordsmanagement.customerrecords;
 
-import com.karthick.customerrecordsmanagement.config.Constants;
-import com.karthick.customerrecordsmanagement.entity.CsvFileDetail;
-import com.karthick.customerrecordsmanagement.entity.CustomerRecord;
+import com.karthick.customerrecordsmanagement.kafka.KafkaProducer;
+import com.karthick.customerrecordsmanagement.kafka.config.Constants;
+import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetail;
 import com.karthick.customerrecordsmanagement.exception.BadRequestException;
-import com.karthick.customerrecordsmanagement.repository.CsvFileDetailRepository;
-import com.karthick.customerrecordsmanagement.repository.CustomerRecordRepository;
+import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetailRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +21,7 @@ import java.util.logging.Logger;
 public class CustomerRecordService {
     private CustomerRecordRepository customerRecordRepository;
     private CsvFileDetailRepository csvFileDetailRepository;
-    private FileProcessService fileProcessService;
+    private KafkaProducer kafkaProducer;
 
     private final Logger logger = Logger.getLogger(CustomerRecordService.class.getName());
 
@@ -41,7 +40,7 @@ public class CustomerRecordService {
                 fileOutputStream.write(file.getBytes());
                 CsvFileDetail csvFileDetail = new CsvFileDetail(file.getOriginalFilename(), file.getContentType(), filePath);
                 csvFileDetailRepository.save(csvFileDetail);
-                fileProcessService.publishKafkaMessage(csvFileDetail.getId(), csvFileDetail.getFileName());
+                kafkaProducer.publishKafkaMessage(csvFileDetail.getId(), csvFileDetail.getFileName());
                 logger.info(file.getOriginalFilename() + " file upload");
             } catch (IOException e) {
                 logger.severe(e.getMessage());

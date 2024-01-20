@@ -1,4 +1,4 @@
-package com.karthick.customerrecordsmanagement.entity;
+package com.karthick.customerrecordsmanagement.customerrecords;
 
 import jakarta.persistence.*;
 import lombok.Data;

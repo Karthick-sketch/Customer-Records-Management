@@ -1,15 +1,13 @@
-package com.karthick.customerrecordsmanagement.service;
+package com.karthick.customerrecordsmanagement.fileupload;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.karthick.customerrecordsmanagement.config.Constants;
-import com.karthick.customerrecordsmanagement.config.FileUploadEvent;
-import com.karthick.customerrecordsmanagement.entity.CsvFileDetail;
-import com.karthick.customerrecordsmanagement.entity.CustomerRecord;
-import com.karthick.customerrecordsmanagement.entity.FileUploadStatus;
-import com.karthick.customerrecordsmanagement.repository.CsvFileDetailRepository;
-import com.karthick.customerrecordsmanagement.repository.CustomerRecordRepository;
-import com.karthick.customerrecordsmanagement.repository.FileUploadStatusRepository;
+import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecord;
+import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordRepository;
+import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetail;
+import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetailRepository;
+import com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus.FileUploadStatus;
+import com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus.FileUploadStatusRepository;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
@@ -17,16 +15,12 @@ import lombok.AllArgsConstructor;
 import org.hibernate.PropertyValueException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 @Service
@@ -35,7 +29,6 @@ public class FileProcessService {
     private CustomerRecordRepository customerRecordRepository;
     private CsvFileDetailRepository csvFileDetailRepository;
     private FileUploadStatusRepository fileUploadStatusRepository;
-    private KafkaTemplate<String, FileUploadEvent> kafkaTemplate;
 
     private final Logger logger = Logger.getLogger(FileProcessService.class.getName());
 
@@ -56,22 +49,8 @@ public class FileProcessService {
         fileUploadStatusRepository.save(fileUploadStatus);
     }
 
-    public void publishKafkaMessage(long fileId, String fileName) {
-        FileUploadEvent fileUploadEvent = new FileUploadEvent(fileId, fileName);
-        CompletableFuture<SendResult<String, FileUploadEvent>> future = kafkaTemplate.send(Constants.TOPIC, fileUploadEvent);
-        future.whenComplete((result, ex) -> {
-            if (ex == null) {
-                logger.info("Sent message=[" + fileUploadEvent + "] with offset=[" + result.getRecordMetadata().offset() + "]");
-            } else {
-                logger.severe("Unable to send message=[" + fileUploadEvent + "] due to : " + ex.getMessage());
-            }
-        });
-    }
-
-    @KafkaListener(topics = Constants.TOPIC, containerFactory = "kafkaListenerContainerFactory")
-    public void pushCustomerRecordsFromFileToDatabase(FileUploadEvent fileUploadEvent) {
-        String fileName = fileUploadEvent.getFileName();
-        Optional<CsvFileDetail> file = csvFileDetailRepository.findById(fileUploadEvent.getFileId());
+    public void pushCustomerRecordsFromFileToDatabase(long fileId, String fileName) {
+        Optional<CsvFileDetail> file = csvFileDetailRepository.findById(fileId);
         if (file.isPresent() && fileName.equals(file.get().getFileName())) {
             String filePath = file.get().getFilePath();
             List<String[]> csvRecords = readCsvFile(filePath);
