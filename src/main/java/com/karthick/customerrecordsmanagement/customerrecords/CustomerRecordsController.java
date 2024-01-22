@@ -1,5 +1,6 @@
 package com.karthick.customerrecordsmanagement.customerrecords;
 
+import com.karthick.customerrecordsmanagement.customerrecords.customfields.CustomFieldsDto;
 import com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus.FileUploadStatus;
 import com.karthick.customerrecordsmanagement.fileupload.FileProcessService;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/record")
@@ -17,6 +19,7 @@ import java.util.List;
 public class CustomerRecordsController {
     private CustomerRecordService customerRecordService;
     private FileProcessService fileProcessService;
+    private CustomFieldsDto customFieldsDto;
 
     @GetMapping
     public ResponseEntity<Page<CustomerRecord>> getCustomerRecordsWithPagination(@RequestParam int offset, int limit) {
@@ -42,5 +45,10 @@ public class CustomerRecordsController {
     @GetMapping("/upload-status/{id}")
     public ResponseEntity<FileUploadStatus> getFileUploadStatusById(@PathVariable long id) {
         return new ResponseEntity<>(fileProcessService.findFileUploadStatusById(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/custom-fields")
+    public ResponseEntity<Map<String, String>> getCustomFields() throws IllegalAccessException {
+        return new ResponseEntity<>(customFieldsDto.map(), HttpStatus.OK);
     }
 }
