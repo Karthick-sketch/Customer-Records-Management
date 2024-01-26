@@ -1,6 +1,6 @@
 package com.karthick.customerrecordsmanagement.customerrecords;
 
-import com.karthick.customerrecordsmanagement.customerrecords.customfields.CustomFieldsDto;
+import com.karthick.customerrecordsmanagement.customerrecords.customfields.CustomFieldsService;
 import com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus.FileUploadStatus;
 import com.karthick.customerrecordsmanagement.fileupload.FileProcessService;
 import lombok.AllArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.Map;
 public class CustomerRecordsController {
     private CustomerRecordService customerRecordService;
     private FileProcessService fileProcessService;
-    private CustomFieldsDto customFieldsDto;
+    private CustomFieldsService customFieldsService;
 
     @GetMapping
     public ResponseEntity<Page<CustomerRecord>> getCustomerRecordsWithPagination(@RequestParam int offset, int limit) {
@@ -48,7 +48,13 @@ public class CustomerRecordsController {
     }
 
     @GetMapping("/custom-fields")
-    public ResponseEntity<Map<String, String>> getCustomFields() throws IllegalAccessException {
-        return new ResponseEntity<>(customFieldsDto.map(), HttpStatus.OK);
+    public ResponseEntity<Map<String, String>> getCustomFields() {
+        return new ResponseEntity<>(customFieldsService.map(), HttpStatus.OK);
+    }
+
+    @PostMapping("/custom-fields")
+    public ResponseEntity<HttpStatus> createCustomFields(@RequestBody Map<String, String> customFields) {
+        customFieldsService.map(customFields);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

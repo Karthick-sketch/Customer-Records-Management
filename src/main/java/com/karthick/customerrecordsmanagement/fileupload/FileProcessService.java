@@ -74,7 +74,7 @@ public class FileProcessService {
         int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
         for (String[] record : csvRecords) {
             try {
-                customerRecordRepository.save(mapTheArraysToCustomerRecord(headers, record));
+                customerRecordRepository.save(mapArraysToCustomerRecord(headers, record));
                 uploadedRecords++;
             } catch (DataIntegrityViolationException e) {
                 if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
@@ -91,7 +91,7 @@ public class FileProcessService {
         createNewFileUploadStatus(fileUploadStatus);
     }
 
-    private CustomerRecord mapTheArraysToCustomerRecord(String[] headers, String[] record) {
+    private CustomerRecord mapArraysToCustomerRecord(String[] headers, String[] record) {
         Map<String, String> recordMap = new HashMap<>();
         for (int i = 0; i < headers.length && i < record.length; i++) {
             recordMap.put(headers[i], record[i]);
