@@ -1,5 +1,8 @@
 package com.karthick.customerrecordsmanagement.customerrecords;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.karthick.customerrecordsmanagement.customerrecords.customfields.CustomFieldService;
 import com.karthick.customerrecordsmanagement.kafka.KafkaProducer;
 import com.karthick.customerrecordsmanagement.kafka.config.Constants;
 import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetail;
@@ -15,15 +18,29 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
 public class CustomerRecordService {
     private CustomerRecordRepository customerRecordRepository;
+    private CustomFieldService customFieldService;
     private CsvFileDetailRepository csvFileDetailRepository;
     private KafkaProducer kafkaProducer;
 
     private final Logger logger = Logger.getLogger(CustomerRecordService.class.getName());
+
+    public Map<String, String> fetchCustomerRecordById(long id) throws IllegalAccessException {
+        Optional<CustomerRecord> customerRecord = customerRecordRepository.findById(id);
+        if (customerRecord.isPresent()) {
+            return Stream.of(convertCustomerRecordToMap(customerRecord.get()), customFieldService.mapCustomFields(id))
+                    .flatMap(map -> map.entrySet().stream())
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } else {
+            throw new NoSuchElementException("There is no record with the Id of " + id);
+        }
+    }
 
     public Page<CustomerRecord> fetchCustomerRecordsWithPagination(int offset, int limit) {
         return customerRecordRepository.findAll(PageRequest.of(offset, limit).withSort(Sort.by(Constants.ORDER_BY_EMAIL)));
@@ -52,5 +69,10 @@ public class CustomerRecordService {
 
     private String getFilePath(String fileName) {
         return System.getProperty("user.dir") + "/src/main/resources/uploads/" + fileName;
+    }
+
+    private Map<String, String> convertCustomerRecordToMap(CustomerRecord customerRecord) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(customerRecord, new TypeReference<>() {});
     }
 }

@@ -18,6 +18,7 @@ public class CustomFieldsMapping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    private long defaultFieldId;
     @NonNull
     private String columnName;
     @NonNull

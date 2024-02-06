@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordRepository;
+import com.karthick.customerrecordsmanagement.customerrecords.customfields.CustomFieldService;
 import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetail;
 import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetailRepository;
 import com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus.FileUploadStatus;
@@ -29,6 +30,7 @@ public class FileProcessService {
     private CustomerRecordRepository customerRecordRepository;
     private CsvFileDetailRepository csvFileDetailRepository;
     private FileUploadStatusRepository fileUploadStatusRepository;
+    private CustomFieldService customFieldService;
 
     private final Logger logger = Logger.getLogger(FileProcessService.class.getName());
 
@@ -74,7 +76,9 @@ public class FileProcessService {
         int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
         for (String[] record : csvRecords) {
             try {
-                customerRecordRepository.save(mapArraysToCustomerRecord(headers, record));
+                List<Map<String, String>> fields = mapDefaultAndCustomFields(headers, record);
+                CustomerRecord customerRecord = customerRecordRepository.save(mapToCustomerRecord(fields.get(0)));
+                customFieldService.createCustomFields(customerRecord.getId(), fields.get(1));
                 uploadedRecords++;
             } catch (DataIntegrityViolationException e) {
                 if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
@@ -91,14 +95,25 @@ public class FileProcessService {
         createNewFileUploadStatus(fileUploadStatus);
     }
 
-    private CustomerRecord mapArraysToCustomerRecord(String[] headers, String[] record) {
-        Map<String, String> recordMap = new HashMap<>();
-        for (int i = 0; i < headers.length && i < record.length; i++) {
-            recordMap.put(headers[i], record[i]);
+    private List<Map<String, String>> mapDefaultAndCustomFields(String[] headers, String[] records) {
+        List<String> fieldNames = CustomerRecord.getFields();
+        Map<String, String> defaultFields = new HashMap<>();
+        Map<String, String> customFields = new HashMap<>();
+        for (int i = 0; i < headers.length && i < records.length; i++) {
+            String key = headers[i], value = records[i];
+            if (fieldNames.contains(key)) {
+                defaultFields.put(key, value);
+            } else {
+                customFields.put(key, value);
+            }
         }
+        return List.of(defaultFields, customFields);
+    }
+
+    private CustomerRecord mapToCustomerRecord(Map<String, String> defaultFields) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return objectMapper.convertValue(recordMap, CustomerRecord.class);
+        return objectMapper.convertValue(defaultFields, CustomerRecord.class);
     }
 
     private List<String[]> readCsvFile(String file) {

@@ -1,6 +1,5 @@
 package com.karthick.customerrecordsmanagement.customerrecords;
 
-import com.karthick.customerrecordsmanagement.customerrecords.customfields.CustomFieldsService;
 import com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus.FileUploadStatus;
 import com.karthick.customerrecordsmanagement.fileupload.FileProcessService;
 import lombok.AllArgsConstructor;
@@ -16,14 +15,18 @@ import java.util.Map;
 @RestController
 @RequestMapping("/record")
 @AllArgsConstructor
-public class CustomerRecordsController {
+public class CustomerRecordController {
     private CustomerRecordService customerRecordService;
     private FileProcessService fileProcessService;
-    private CustomFieldsService customFieldsService;
 
     @GetMapping
     public ResponseEntity<Page<CustomerRecord>> getCustomerRecordsWithPagination(@RequestParam int offset, int limit) {
         return new ResponseEntity<>(customerRecordService.fetchCustomerRecordsWithPagination(offset, limit), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, String>> getCustomerRecordById(@PathVariable long id) throws IllegalAccessException {
+        return new ResponseEntity<>(customerRecordService.fetchCustomerRecordById(id), HttpStatus.OK);
     }
 
     @PostMapping
@@ -45,16 +48,5 @@ public class CustomerRecordsController {
     @GetMapping("/upload-status/{id}")
     public ResponseEntity<FileUploadStatus> getFileUploadStatusById(@PathVariable long id) {
         return new ResponseEntity<>(fileProcessService.findFileUploadStatusById(id), HttpStatus.OK);
-    }
-
-    @GetMapping("/custom-fields")
-    public ResponseEntity<Map<String, String>> getCustomFields() {
-        return new ResponseEntity<>(customFieldsService.map(), HttpStatus.OK);
-    }
-
-    @PostMapping("/custom-fields")
-    public ResponseEntity<HttpStatus> createCustomFields(@RequestBody Map<String, String> customFields) {
-        customFieldsService.map(customFields);
-        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }
