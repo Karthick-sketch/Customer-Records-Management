@@ -29,6 +29,11 @@ public class CustomerRecordController {
         return new ResponseEntity<>(customerRecordService.fetchCustomerRecordById(id), HttpStatus.OK);
     }
 
+    @GetMapping("/fields")
+    public ResponseEntity<List<Map<String, String>>> getAllCustomerRecordFields() throws IllegalAccessException {
+        return new ResponseEntity<>(customerRecordService.fetchCustomerRecords(), HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<CustomerRecord> createCustomerRecord(@RequestBody CustomerRecord customerRecord) {
         return new ResponseEntity<>(customerRecordService.createNewCustomerRecord(customerRecord), HttpStatus.CREATED);

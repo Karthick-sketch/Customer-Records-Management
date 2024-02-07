@@ -3,9 +3,7 @@ package com.karthick.customerrecordsmanagement.customerrecords.customfields;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -23,14 +21,30 @@ public class CustomFieldService {
         customFieldRepository.save(customField);
     }
 
-    public Map<String, String> mapCustomFields(long defaultFieldId) throws IllegalAccessException {
-        List<CustomField> customFields = customFieldRepository.findByDefaultFieldId(defaultFieldId);
-        List<CustomFieldsMapping> customFieldsMapping = customFieldMappingRepository.findByDefaultFieldId(defaultFieldId);
-        Map<String, String> customFieldsMap = new HashMap<>();
+    public List<Map<String, String>> mapCustomFields() throws IllegalAccessException {
+        List<CustomField> customFields = customFieldRepository.findAll();
+        List<Map<String, String>> customFieldsMapList = new ArrayList<>();
         for (CustomField customField : customFields) {
-            for (CustomFieldsMapping cfm : customFieldsMapping) {
-                customFieldsMap.put(cfm.getColumnName(), customField.getValueByColumnName(cfm.getFieldName()));
-            }
+            List<CustomFieldsMapping> customFieldsMapping = customFieldMappingRepository.findByDefaultFieldId(customField.getDefaultFieldId());
+            customFieldsMapList.add(convertCustomFieldsToMap(customField, customFieldsMapping));
+        }
+        return customFieldsMapList;
+    }
+
+    public Map<String, String> mapCustomFields(long defaultFieldId) throws IllegalAccessException {
+        Optional<CustomField> customField = customFieldRepository.findByDefaultFieldId(defaultFieldId);
+        if (customField.isPresent()) {
+            List<CustomFieldsMapping> customFieldsMapping = customFieldMappingRepository.findByDefaultFieldId(defaultFieldId);
+            return convertCustomFieldsToMap(customField.get(), customFieldsMapping);
+        } else {
+            throw new NoSuchElementException("There are no custom fields present in the database with Id of " + defaultFieldId);
+        }
+    }
+
+    private Map<String, String> convertCustomFieldsToMap(CustomField customField, List<CustomFieldsMapping> customFieldsMapping) throws IllegalAccessException {
+        Map<String, String> customFieldsMap = new HashMap<>();
+        for (CustomFieldsMapping cfm : customFieldsMapping) {
+            customFieldsMap.put(cfm.getColumnName(), customField.getValueByColumnName(cfm.getFieldName()));
         }
         return customFieldsMap;
     }
