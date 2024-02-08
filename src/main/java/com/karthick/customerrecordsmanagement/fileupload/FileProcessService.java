@@ -77,6 +77,7 @@ public class FileProcessService {
         for (String[] record : csvRecords) {
             try {
                 List<Map<String, String>> fields = mapDefaultAndCustomFields(headers, record);
+                // CustomerRecord customerRecord = customerRecordRepository.saveIgnore(mapToCustomerRecord(fields.get(0)));
                 CustomerRecord customerRecord = customerRecordRepository.save(mapToCustomerRecord(fields.get(0)));
                 customFieldService.createCustomFields(customerRecord.getId(), fields.get(1));
                 uploadedRecords++;

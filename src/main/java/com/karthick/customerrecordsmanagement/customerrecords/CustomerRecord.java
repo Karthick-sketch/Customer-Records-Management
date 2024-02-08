@@ -1,11 +1,11 @@
 package com.karthick.customerrecordsmanagement.customerrecords;
 
+import com.karthick.customerrecordsmanagement.customerrecords.customfields.CustomField;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Entity(name = "customer_records")
@@ -28,9 +28,13 @@ public class CustomerRecord {
     private String country;
     private int zipcode;
 
+    @OneToOne(optional = false)
+    @JoinColumn(name = "custom_field_id", referencedColumnName = "id")
+    private CustomField customField;
+
     public static List<String> getFields() {
         return Stream.of(CustomerRecord.class.getDeclaredFields())
                 .map(Field::getName)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

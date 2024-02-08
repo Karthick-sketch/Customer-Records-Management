@@ -24,14 +24,14 @@ public class CustomerRecordController {
         return new ResponseEntity<>(customerRecordService.fetchCustomerRecordsWithPagination(offset, limit), HttpStatus.OK);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Map<String, String>> getCustomerRecordById(@PathVariable long id) throws IllegalAccessException {
-        return new ResponseEntity<>(customerRecordService.fetchCustomerRecordById(id), HttpStatus.OK);
+    @GetMapping("/fields")
+    public ResponseEntity<List<Map<String, String>>> getAllCustomerRecordFields(@RequestParam int offset, int limit) {
+        return new ResponseEntity<>(customerRecordService.fetchCustomerRecords(offset, limit), HttpStatus.OK);
     }
 
-    @GetMapping("/fields")
-    public ResponseEntity<List<Map<String, String>>> getAllCustomerRecordFields() throws IllegalAccessException {
-        return new ResponseEntity<>(customerRecordService.fetchCustomerRecords(), HttpStatus.OK);
+    @GetMapping("/{id}")
+    public ResponseEntity<Map<String, String>> getCustomerRecordById(@PathVariable long id) {
+        return new ResponseEntity<>(customerRecordService.fetchCustomerRecordById(id), HttpStatus.OK);
     }
 
     @PostMapping

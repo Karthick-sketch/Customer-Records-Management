@@ -1,14 +1,12 @@
 package com.karthick.customerrecordsmanagement.customerrecords.customfields;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
 @Entity(name = "custom_fields")
 @Data
@@ -34,11 +32,12 @@ public class CustomField {
     }
 
     public String setField(String value) {
-        String fieldName = "";
+        List<String> nonFields = List.of("id", "defaultFieldId", "customerRecord");
+        String fieldName = null;
         Field[] fields = this.getClass().getDeclaredFields();
         for (Field field : fields) {
             try {
-                if (!field.getName().equals("id") && !field.getName().equals("defaultFieldId")) {
+                if (!nonFields.contains(field.getName())) {
                     field.setAccessible(true);
                     if (field.get(this) == null) {
                         field.set(this, value);
@@ -46,20 +45,24 @@ public class CustomField {
                         break;
                     }
                 }
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
+            } catch (IllegalAccessException e) {
+                e.fillInStackTrace();
             }
         }
         return fieldName;
     }
 
-    public String getValueByColumnName(String columnName) throws IllegalAccessException {
-        Field field = ReflectionUtils.findField(CustomField.class, columnName);
+    public String getValueByFieldName(String fieldName) {
+        Field field = ReflectionUtils.findField(CustomField.class, fieldName);
         if (field != null) {
-            field.setAccessible(true);
-            return (String) field.get(this);
+            try {
+                field.setAccessible(true);
+                return (String) field.get(this);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e.getLocalizedMessage());
+            }
         } else {
-            throw new RuntimeException("There is no field called " + columnName + " in the CustomField class.");
+            throw new RuntimeException("There is no field called " + fieldName + " in the CustomField class.");
         }
     }
 }

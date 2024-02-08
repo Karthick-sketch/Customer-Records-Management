@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CustomFieldMappingRepository extends JpaRepository<CustomFieldsMapping, Long> {
-    List<CustomFieldsMapping> findByDefaultFieldId(long defaultFieldId);
+public interface CustomFieldMappingRepository extends JpaRepository<CustomFieldMapping, Long> {
+    List<CustomFieldMapping> findByDefaultFieldId(long defaultFieldId);
 }

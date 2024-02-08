@@ -38,11 +38,12 @@ public class CustomerRecordService {
         return customerRecordRepository.save(customerRecord);
     }
 
-    public List<Map<String, String>> fetchCustomerRecords() throws IllegalAccessException {
-        List<Map<String, String>> customerRecords = new ArrayList<>(customerRecordRepository.findAll().stream()
+    public List<Map<String, String>> fetchCustomerRecords(int offset, int limit) {
+        Page<CustomerRecord> customerRecordsPage = customerRecordRepository.findAll(PageRequest.of(offset, limit));
+        List<Map<String, String>> customerRecords = customerRecordsPage.stream()
                 .map(this::convertCustomerRecordToMap)
-                .toList());
-        List<Map<String, String>> customFields = customFieldService.mapCustomFields();
+                .toList();
+        List<Map<String, String>> customFields = customFieldService.mapCustomFields(offset, limit);
 
         List<Map<String, String>> customerRecordsMap = new ArrayList<>();
         for (int i = 0; i < customerRecords.size() && i < customFields.size(); i++) {
@@ -51,7 +52,7 @@ public class CustomerRecordService {
         return customerRecordsMap;
     }
 
-    public Map<String, String> fetchCustomerRecordById(long id) throws IllegalAccessException {
+    public Map<String, String> fetchCustomerRecordById(long id) {
         Optional<CustomerRecord> customerRecord = customerRecordRepository.findById(id);
         if (customerRecord.isPresent()) {
             return mergeMaps(List.of(convertCustomerRecordToMap(customerRecord.get()), customFieldService.mapCustomFields(id)));
@@ -90,5 +91,14 @@ public class CustomerRecordService {
         return mapList.stream()
                 .flatMap(map -> map.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public CustomerRecord getCustomerRecordById(long id) {
+        Optional<CustomerRecord> customerRecord = customerRecordRepository.findById(id);
+        if (customerRecord.isPresent()) {
+            return customerRecord.get();
+        } else {
+            throw new NoSuchElementException("There is no record with the Id of " + id);
+        }
     }
 }
