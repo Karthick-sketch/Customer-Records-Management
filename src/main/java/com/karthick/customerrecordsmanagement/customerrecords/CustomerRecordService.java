@@ -52,20 +52,22 @@ public class CustomerRecordService {
         }
     }
 
+    public CsvFileDetail saveCsvFileDetail(String fileName, String fileType, String filePath) {
+        return csvFileDetailRepository.save(new CsvFileDetail(fileName, fileType, filePath));
+    }
+
     public void uploadCsvFile(MultipartFile file) {
-        if (Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
-            String filePath = getFilePath(file.getOriginalFilename());
-            try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
-                fileOutputStream.write(file.getBytes());
-                CsvFileDetail csvFileDetail = new CsvFileDetail(file.getOriginalFilename(), file.getContentType(), filePath);
-                csvFileDetailRepository.save(csvFileDetail);
-                kafkaProducer.publishKafkaMessage(csvFileDetail.getId(), csvFileDetail.getFileName());
-                logger.info(file.getOriginalFilename() + " file upload");
-            } catch (IOException e) {
-                logger.severe(e.getMessage());
-            }
-        } else {
+        if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
             throw new BadRequestException("Only CSV files are allowed");
+        }
+        String filePath = getFilePath(file.getOriginalFilename());
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
+            fileOutputStream.write(file.getBytes());
+            CsvFileDetail csvFileDetail = saveCsvFileDetail(file.getOriginalFilename(), file.getContentType(), filePath);
+            kafkaProducer.publishKafkaMessage(csvFileDetail.getId(), csvFileDetail.getFileName());
+            logger.info(file.getOriginalFilename() + " file upload");
+        } catch (IOException e) {
+            logger.severe(e.getMessage());
         }
     }
 

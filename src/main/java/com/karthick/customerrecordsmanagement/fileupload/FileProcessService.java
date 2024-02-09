@@ -3,8 +3,8 @@ package com.karthick.customerrecordsmanagement.fileupload;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecord;
-import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordRepository;
-import com.karthick.customerrecordsmanagement.customerrecords.customfields.CustomFieldService;
+import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordDto;
+import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordService;
 import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetail;
 import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetailRepository;
 import com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus.FileUploadStatus;
@@ -27,10 +27,9 @@ import java.util.logging.Logger;
 @Service
 @AllArgsConstructor
 public class FileProcessService {
-    private CustomerRecordRepository customerRecordRepository;
+    private CustomerRecordService customerRecordService;
     private CsvFileDetailRepository csvFileDetailRepository;
     private FileUploadStatusRepository fileUploadStatusRepository;
-    private CustomFieldService customFieldService;
 
     private final Logger logger = Logger.getLogger(FileProcessService.class.getName());
 
@@ -46,39 +45,33 @@ public class FileProcessService {
         return fileUploadStatus.get();
     }
 
-    public void createNewFileUploadStatus(FileUploadStatus fileUploadStatus) {
-        fileUploadStatusRepository.save(fileUploadStatus);
+    public void createNewFileUploadStatus(String fileName, int total, int uploaded, int duplicate, int invalid) {
+        fileUploadStatusRepository.save(new FileUploadStatus(fileName, total, uploaded, duplicate, invalid));
     }
 
     public void pushCustomerRecordsFromFileToDatabase(long fileId, String fileName) {
         Optional<CsvFileDetail> file = csvFileDetailRepository.findById(fileId);
-        if (file.isPresent() && fileName.equals(file.get().getFileName())) {
-            String filePath = file.get().getFilePath();
-            List<String[]> csvRecords = readCsvFile(filePath);
-            if (csvRecords != null) {
-                createCustomerRecordsAndFileUploadStatus(fileName, csvRecords);
-            } else {
-                logger.warning(fileName + " file is empty");
-            }
-            if (!new File(filePath).delete()) {
-                logger.severe("Failed to delete the file");
-            }
-        } else {
+        if (file.isEmpty() || !fileName.equals(file.get().getFileName())) {
             throw new NoSuchElementException("file not found");
+        }
+        String filePath = file.get().getFilePath();
+        List<String[]> csvRecords = readCsvFile(filePath);
+        if (csvRecords != null) {
+            createCustomerRecordsAndFileUploadStatus(fileName, csvRecords);
+        } else {
+            logger.warning(fileName + " file is empty");
+        }
+        if (!new File(filePath).delete()) {
+            logger.severe("Failed to delete the file");
         }
     }
 
     private void createCustomerRecordsAndFileUploadStatus(String fileName, List<String[]> csvRecords) {
-        FileUploadStatus fileUploadStatus = new FileUploadStatus(fileName);
         String[] headers = csvRecords.remove(0);
-        fileUploadStatus.setTotalRecords(csvRecords.size());
         int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
         for (String[] record : csvRecords) {
             try {
-                List<Map<String, String>> fields = mapDefaultAndCustomFields(headers, record);
-                // CustomerRecord customerRecord = customerRecordRepository.saveIgnore(mapToCustomerRecord(fields.get(0)));
-                CustomerRecord customerRecord = customerRecordRepository.save(mapToCustomerRecord(fields.get(0)));
-                customFieldService.createCustomFields(customerRecord, fields.get(1));
+                customerRecordService.createNewCustomerRecord(mapDefaultAndCustomFields(headers, record));
                 uploadedRecords++;
             } catch (DataIntegrityViolationException e) {
                 if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
@@ -86,16 +79,13 @@ public class FileProcessService {
                 } else if (e.getCause().getClass().equals(PropertyValueException.class)) {
                     invalidRecords++;
                 }
-                logger.warning(e.getMessage());
+                logger.warning("Exception in Customer record creation. Error : " + e.getMessage());
             }
         }
-        fileUploadStatus.setUploadedRecords(uploadedRecords);
-        fileUploadStatus.setInvalidRecords(invalidRecords);
-        fileUploadStatus.setDuplicateRecords(duplicateRecords);
-        createNewFileUploadStatus(fileUploadStatus);
+        createNewFileUploadStatus(fileName, csvRecords.size(), uploadedRecords, duplicateRecords, invalidRecords);
     }
 
-    private List<Map<String, String>> mapDefaultAndCustomFields(String[] headers, String[] records) {
+    private CustomerRecordDto mapDefaultAndCustomFields(String[] headers, String[] records) {
         List<String> fieldNames = CustomerRecord.getFields();
         Map<String, String> defaultFields = new HashMap<>();
         Map<String, String> customFields = new HashMap<>();
@@ -107,7 +97,7 @@ public class FileProcessService {
                 customFields.put(key, value);
             }
         }
-        return List.of(defaultFields, customFields);
+        return new CustomerRecordDto(mapToCustomerRecord(defaultFields), customFields);
     }
 
     private CustomerRecord mapToCustomerRecord(Map<String, String> defaultFields) {
@@ -117,15 +107,11 @@ public class FileProcessService {
     }
 
     private List<String[]> readCsvFile(String file) {
-        List<String[]> splitData = null;
-        try {
-            FileReader filereader = new FileReader(file);
-            CSVReader csvReader = new CSVReaderBuilder(filereader).withSkipLines(0).build();
-            splitData = csvReader.readAll();
-            csvReader.close();
+        try (CSVReader csvReader = new CSVReaderBuilder(new FileReader(file)).withSkipLines(0).build()) {
+            return csvReader.readAll();
         } catch (IOException | CsvException e) {
             logger.severe(e.getMessage());
         }
-        return splitData;
+        return null;
     }
 }
