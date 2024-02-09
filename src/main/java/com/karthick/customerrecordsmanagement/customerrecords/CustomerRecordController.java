@@ -1,7 +1,8 @@
 package com.karthick.customerrecordsmanagement.customerrecords;
 
-import com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus.FileUploadStatus;
-import com.karthick.customerrecordsmanagement.fileupload.FileProcessService;
+import com.karthick.customerrecordsmanagement.fileuploadstatus.FileUploadStatusDto;
+import com.karthick.customerrecordsmanagement.fileuploadstatus.FileUploadStatus;
+import com.karthick.customerrecordsmanagement.fileuploadstatus.FileUploadStatusService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CustomerRecordController {
     private CustomerRecordService customerRecordService;
-    private FileProcessService fileProcessService;
+    private FileUploadStatusService fileUploadStatusService;
 
     @GetMapping
     public ResponseEntity<List<CustomerRecordDto>> getCustomerRecordsWithPagination(@RequestParam int offset, int limit) {
@@ -33,18 +34,17 @@ public class CustomerRecordController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadCsvFile(@RequestPart("file") MultipartFile file) {
-        customerRecordService.uploadCsvFile(file);
-        return new ResponseEntity<>("File uploaded successfully, your data will be processed in a moment", HttpStatus.OK);
+    public ResponseEntity<FileUploadStatusDto> uploadCsvFile(@RequestPart("file") MultipartFile file) {
+        return new ResponseEntity<>(customerRecordService.uploadCsvFile(file), HttpStatus.OK);
     }
 
     @GetMapping("/upload-status/all")
     public ResponseEntity<List<FileUploadStatus>> getAllFileUploadStatus() {
-        return new ResponseEntity<>(fileProcessService.findAllFileUploadStatus(), HttpStatus.OK);
+        return new ResponseEntity<>(fileUploadStatusService.findAllFileUploadStatus(), HttpStatus.OK);
     }
 
     @GetMapping("/upload-status/{id}")
     public ResponseEntity<FileUploadStatus> getFileUploadStatusById(@PathVariable long id) {
-        return new ResponseEntity<>(fileProcessService.findFileUploadStatusById(id), HttpStatus.OK);
+        return new ResponseEntity<>(fileUploadStatusService.findFileUploadStatusById(id), HttpStatus.OK);
     }
 }

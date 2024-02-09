@@ -5,10 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordDto;
 import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordService;
-import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetail;
-import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetailRepository;
-import com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus.FileUploadStatus;
-import com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus.FileUploadStatusRepository;
+import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetail;
+import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetailService;
+import com.karthick.customerrecordsmanagement.fileuploadstatus.FileUploadStatusService;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
@@ -26,47 +25,27 @@ import java.util.logging.Logger;
 
 @Service
 @AllArgsConstructor
-public class FileProcessService {
+public class FileUploadProcess {
     private CustomerRecordService customerRecordService;
-    private CsvFileDetailRepository csvFileDetailRepository;
-    private FileUploadStatusRepository fileUploadStatusRepository;
+    private FileUploadStatusService fileUploadStatusService;
+    private CsvFileDetailService csvFileDetailService;
 
-    private final Logger logger = Logger.getLogger(FileProcessService.class.getName());
+    private final Logger logger = Logger.getLogger(FileUploadProcess.class.getName());
 
-    public List<FileUploadStatus> findAllFileUploadStatus() {
-        return fileUploadStatusRepository.findAll();
-    }
-
-    public FileUploadStatus findFileUploadStatusById(long id) {
-        Optional<FileUploadStatus> fileUploadStatus = fileUploadStatusRepository.findById(id);
-        if (fileUploadStatus.isEmpty()) {
-            throw new NoSuchElementException("The uploaded file status with the Id of " + id + " is not found");
-        }
-        return fileUploadStatus.get();
-    }
-
-    public void createNewFileUploadStatus(String fileName, int total, int uploaded, int duplicate, int invalid) {
-        fileUploadStatusRepository.save(new FileUploadStatus(fileName, total, uploaded, duplicate, invalid));
-    }
-
-    public void pushCustomerRecordsFromFileToDatabase(long fileId, String fileName) {
-        Optional<CsvFileDetail> file = csvFileDetailRepository.findById(fileId);
-        if (file.isEmpty() || !fileName.equals(file.get().getFileName())) {
-            throw new NoSuchElementException("file not found");
-        }
-        String filePath = file.get().getFilePath();
-        List<String[]> csvRecords = readCsvFile(filePath);
+    public void pushCustomerRecordsFromFileToDatabase(long fileId, long fileUploadStatusId) {
+        CsvFileDetail csvFileDetail = csvFileDetailService.fetchCsvFileDetailById(fileId);
+        List<String[]> csvRecords = readCsvFile(csvFileDetail.getFilePath());
         if (csvRecords != null) {
-            createCustomerRecordsAndFileUploadStatus(fileName, csvRecords);
+            createCustomerRecordsAndFileUploadStatus(csvRecords, fileUploadStatusId);
         } else {
-            logger.warning(fileName + " file is empty");
+            logger.warning(csvFileDetail.getFileName() + " file is empty");
         }
-        if (!new File(filePath).delete()) {
+        if (!new File(csvFileDetail.getFilePath()).delete()) {
             logger.severe("Failed to delete the file");
         }
     }
 
-    private void createCustomerRecordsAndFileUploadStatus(String fileName, List<String[]> csvRecords) {
+    private void createCustomerRecordsAndFileUploadStatus(List<String[]> csvRecords, long fileUploadStatusId) {
         String[] headers = csvRecords.remove(0);
         int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
         for (String[] record : csvRecords) {
@@ -82,7 +61,7 @@ public class FileProcessService {
                 logger.warning("Exception in Customer record creation. Error : " + e.getMessage());
             }
         }
-        createNewFileUploadStatus(fileName, csvRecords.size(), uploadedRecords, duplicateRecords, invalidRecords);
+        fileUploadStatusService.updateFileUploadStatus(fileUploadStatusId, csvRecords.size(), uploadedRecords, duplicateRecords, invalidRecords);
     }
 
     private CustomerRecordDto mapDefaultAndCustomFields(String[] headers, String[] records) {

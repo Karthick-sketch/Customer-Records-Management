@@ -1,10 +1,13 @@
 package com.karthick.customerrecordsmanagement.customerrecords;
 
-import com.karthick.customerrecordsmanagement.customerrecords.customfields.CustomFieldService;
+import com.karthick.customerrecordsmanagement.customfields.CustomFieldService;
+import com.karthick.customerrecordsmanagement.fileuploadstatus.FileUploadStatusDto;
+import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetailService;
+import com.karthick.customerrecordsmanagement.fileuploadstatus.FileUploadStatus;
+import com.karthick.customerrecordsmanagement.fileuploadstatus.FileUploadStatusService;
 import com.karthick.customerrecordsmanagement.kafka.KafkaProducer;
-import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetail;
+import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetail;
 import com.karthick.customerrecordsmanagement.exception.BadRequestException;
-import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetailRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -20,7 +23,8 @@ import java.util.logging.Logger;
 public class CustomerRecordService {
     private CustomerRecordRepository customerRecordRepository;
     private CustomFieldService customFieldService;
-    private CsvFileDetailRepository csvFileDetailRepository;
+    private FileUploadStatusService fileUploadStatusService;
+    private CsvFileDetailService csvFileDetailService;
     private KafkaProducer kafkaProducer;
 
     private final Logger logger = Logger.getLogger(CustomerRecordService.class.getName());
@@ -52,23 +56,22 @@ public class CustomerRecordService {
         }
     }
 
-    public CsvFileDetail saveCsvFileDetail(String fileName, String fileType, String filePath) {
-        return csvFileDetailRepository.save(new CsvFileDetail(fileName, fileType, filePath));
-    }
-
-    public void uploadCsvFile(MultipartFile file) {
+    public FileUploadStatusDto uploadCsvFile(MultipartFile file) {
         if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
             throw new BadRequestException("Only CSV files are allowed");
         }
         String filePath = getFilePath(file.getOriginalFilename());
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
             fileOutputStream.write(file.getBytes());
-            CsvFileDetail csvFileDetail = saveCsvFileDetail(file.getOriginalFilename(), file.getContentType(), filePath);
-            kafkaProducer.publishKafkaMessage(csvFileDetail.getId(), csvFileDetail.getFileName());
+            CsvFileDetail csvFileDetail = csvFileDetailService.saveCsvFileDetail(file.getOriginalFilename(), file.getContentType(), filePath);
+            FileUploadStatus fileUploadStatus = fileUploadStatusService.createNewFileUploadStatus(csvFileDetail.getFileName());
+            kafkaProducer.publishKafkaMessage(csvFileDetail.getId(), fileUploadStatus.getId());
             logger.info(file.getOriginalFilename() + " file upload");
+            return new FileUploadStatusDto(fileUploadStatus.getId());
         } catch (IOException e) {
             logger.severe(e.getMessage());
         }
+        return null;
     }
 
     private String getFilePath(String fileName) {

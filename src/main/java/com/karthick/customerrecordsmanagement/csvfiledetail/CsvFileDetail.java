@@ -1,4 +1,4 @@
-package com.karthick.customerrecordsmanagement.fileupload.csvfiledetail;
+package com.karthick.customerrecordsmanagement.csvfiledetail;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

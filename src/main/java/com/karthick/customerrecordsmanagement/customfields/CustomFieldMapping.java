@@ -1,4 +1,4 @@
-package com.karthick.customerrecordsmanagement.customerrecords.customfields;
+package com.karthick.customerrecordsmanagement.customfields;
 
 import jakarta.persistence.*;
 import lombok.Data;

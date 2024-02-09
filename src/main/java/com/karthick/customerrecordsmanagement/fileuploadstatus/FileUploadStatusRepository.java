@@ -1,4 +1,4 @@
-package com.karthick.customerrecordsmanagement.fileupload.fileuploadstatus;
+package com.karthick.customerrecordsmanagement.fileuploadstatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

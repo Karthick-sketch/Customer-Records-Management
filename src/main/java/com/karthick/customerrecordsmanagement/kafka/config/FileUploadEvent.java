@@ -10,13 +10,13 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 public class FileUploadEvent {
-    private long fileId;
-    private String fileName;
+    private long csvFileDetailId;
+    private long fileUploadStatusId;
     private LocalDateTime timestamp;
 
-    public FileUploadEvent(long fileId, String fileName) {
-        this.fileId = fileId;
-        this.fileName = fileName;
+    public FileUploadEvent(long csvFileDetailId, long fileUploadStatusId) {
+        this.csvFileDetailId = csvFileDetailId;
+        this.fileUploadStatusId = fileUploadStatusId;
         this.timestamp = LocalDateTime.now();
     }
 }

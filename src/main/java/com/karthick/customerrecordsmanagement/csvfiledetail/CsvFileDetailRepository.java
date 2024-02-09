@@ -1,4 +1,4 @@
-package com.karthick.customerrecordsmanagement.fileupload.csvfiledetail;
+package com.karthick.customerrecordsmanagement.csvfiledetail;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
