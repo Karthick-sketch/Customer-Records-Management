@@ -1,5 +1,6 @@
 package com.karthick.customerrecordsmanagement.customerrecords.customfields;
 
+import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecord;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,43 +15,32 @@ public class CustomFieldService {
     private CustomFieldRepository customFieldRepository;
     private CustomFieldMappingRepository customFieldMappingRepository;
 
-    public void createCustomFields(long defaultFieldId, Map<String, String> customFieldsMap) {
-        CustomField customField = new CustomField(defaultFieldId);
+    public void createCustomFields(CustomerRecord customerRecord, Map<String, String> customFieldsMap) {
+        CustomField customField = customFieldRepository.save(new CustomField(customerRecord));
         customFieldsMap.forEach((key, value) -> {
-            CustomFieldMapping customFieldMapping = new CustomFieldMapping(key, customField.setField(value));
-            customFieldMapping.setDefaultFieldId(defaultFieldId);
+            CustomFieldMapping customFieldMapping = new CustomFieldMapping(key, customField.setField(value), customField);
             customFieldMappingRepository.save(customFieldMapping);
         });
-        customFieldRepository.save(customField);
-    }
-
-    public List<Map<String, String>> mapCustomFields() {
-        List<CustomField> customFields = customFieldRepository.findAll();
-        List<Map<String, String>> customFieldsMapList = new ArrayList<>();
-        for (CustomField customField : customFields) {
-            List<CustomFieldMapping> customFieldMapping = customFieldMappingRepository.findByDefaultFieldId(customField.getDefaultFieldId());
-            customFieldsMapList.add(convertCustomFieldsToMap(customField, customFieldMapping));
-        }
-        return customFieldsMapList;
     }
 
     public List<Map<String, String>> mapCustomFields(int offset, int limit) {
         Page<CustomField> customFields = customFieldRepository.findAll(PageRequest.of(offset, limit));
         List<Map<String, String>> customFieldsMapList = new ArrayList<>();
         for (CustomField customField : customFields) {
-            List<CustomFieldMapping> customFieldMapping = customFieldMappingRepository.findByDefaultFieldId(customField.getDefaultFieldId());
+            List<CustomFieldMapping> customFieldMapping = customFieldMappingRepository.findByCustomFieldId(customField.getId());
             customFieldsMapList.add(convertCustomFieldsToMap(customField, customFieldMapping));
         }
         return customFieldsMapList;
     }
 
-    public Map<String, String> mapCustomFields(long defaultFieldId) {
-        Optional<CustomField> customField = customFieldRepository.findByDefaultFieldId(defaultFieldId);
-        if (customField.isPresent()) {
-            List<CustomFieldMapping> customFieldMapping = customFieldMappingRepository.findByDefaultFieldId(defaultFieldId);
-            return convertCustomFieldsToMap(customField.get(), customFieldMapping);
+    public Map<String, String> mapCustomFields(long customerRecordId) {
+        Optional<CustomField> customFieldOptional = customFieldRepository.findByCustomerRecordId(customerRecordId);
+        if (customFieldOptional.isPresent()) {
+            CustomField customField = customFieldOptional.get();
+            List<CustomFieldMapping> customFieldMapping = customFieldMappingRepository.findByCustomFieldId(customField.getId());
+            return convertCustomFieldsToMap(customField, customFieldMapping);
         } else {
-            throw new NoSuchElementException("There are no custom fields present in the database with Id of " + defaultFieldId);
+            throw new NoSuchElementException("There are no custom fields present in the database with Id of " + customerRecordId);
         }
     }
 

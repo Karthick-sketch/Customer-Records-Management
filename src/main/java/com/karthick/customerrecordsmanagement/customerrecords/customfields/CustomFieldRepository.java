@@ -7,5 +7,5 @@ import java.util.Optional;
 
 @Repository
 public interface CustomFieldRepository extends JpaRepository<CustomField, Long> {
-    Optional<CustomField> findByDefaultFieldId(long defaultFieldId);
+    Optional<CustomField> findByCustomerRecordId(long customerRecordId);
 }

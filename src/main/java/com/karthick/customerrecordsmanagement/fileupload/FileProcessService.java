@@ -40,11 +40,10 @@ public class FileProcessService {
 
     public FileUploadStatus findFileUploadStatusById(long id) {
         Optional<FileUploadStatus> fileUploadStatus = fileUploadStatusRepository.findById(id);
-        if (fileUploadStatus.isPresent()) {
-            return fileUploadStatus.get();
-        } else {
+        if (fileUploadStatus.isEmpty()) {
             throw new NoSuchElementException("The uploaded file status with the Id of " + id + " is not found");
         }
+        return fileUploadStatus.get();
     }
 
     public void createNewFileUploadStatus(FileUploadStatus fileUploadStatus) {
@@ -79,7 +78,7 @@ public class FileProcessService {
                 List<Map<String, String>> fields = mapDefaultAndCustomFields(headers, record);
                 // CustomerRecord customerRecord = customerRecordRepository.saveIgnore(mapToCustomerRecord(fields.get(0)));
                 CustomerRecord customerRecord = customerRecordRepository.save(mapToCustomerRecord(fields.get(0)));
-                customFieldService.createCustomFields(customerRecord.getId(), fields.get(1));
+                customFieldService.createCustomFields(customerRecord, fields.get(1));
                 uploadedRecords++;
             } catch (DataIntegrityViolationException e) {
                 if (e.getCause().getClass().equals(ConstraintViolationException.class)) {

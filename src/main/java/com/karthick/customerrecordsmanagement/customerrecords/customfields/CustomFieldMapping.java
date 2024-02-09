@@ -1,9 +1,6 @@
 package com.karthick.customerrecordsmanagement.customerrecords.customfields;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -17,9 +14,13 @@ public class CustomFieldMapping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private long defaultFieldId;
     @NonNull
     private String columnName;
     @NonNull
     private String fieldName;
+
+    @NonNull
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "custom_field_id", referencedColumnName = "id")
+    private CustomField customField;
 }

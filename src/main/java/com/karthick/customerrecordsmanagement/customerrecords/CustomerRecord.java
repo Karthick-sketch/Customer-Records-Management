@@ -1,6 +1,5 @@
 package com.karthick.customerrecordsmanagement.customerrecords;
 
-import com.karthick.customerrecordsmanagement.customerrecords.customfields.CustomField;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -27,10 +26,6 @@ public class CustomerRecord {
     private String state;
     private String country;
     private int zipcode;
-
-    @OneToOne(optional = false)
-    @JoinColumn(name = "custom_field_id", referencedColumnName = "id")
-    private CustomField customField;
 
     public static List<String> getFields() {
         return Stream.of(CustomerRecord.class.getDeclaredFields())

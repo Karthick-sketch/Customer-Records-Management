@@ -1,24 +1,19 @@
 package com.karthick.customerrecordsmanagement.customerrecords;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.karthick.customerrecordsmanagement.customerrecords.customfields.CustomFieldService;
 import com.karthick.customerrecordsmanagement.kafka.KafkaProducer;
-import com.karthick.customerrecordsmanagement.kafka.config.Constants;
 import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetail;
 import com.karthick.customerrecordsmanagement.exception.BadRequestException;
 import com.karthick.customerrecordsmanagement.fileupload.csvfiledetail.CsvFileDetailRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -30,32 +25,28 @@ public class CustomerRecordService {
 
     private final Logger logger = Logger.getLogger(CustomerRecordService.class.getName());
 
-    public Page<CustomerRecord> fetchCustomerRecordsWithPagination(int offset, int limit) {
-        return customerRecordRepository.findAll(PageRequest.of(offset, limit).withSort(Sort.by(Constants.ORDER_BY_EMAIL)));
+    @Transactional
+    public CustomerRecordDto createNewCustomerRecord(CustomerRecordDto customerRecordDto) {
+        CustomerRecord customerRecord = customerRecordRepository.save(customerRecordDto.getDefaultFields());
+        customFieldService.createCustomFields(customerRecord, customerRecordDto.getCustomFields());
+        return customerRecordDto;
     }
 
-    public CustomerRecord createNewCustomerRecord(CustomerRecord customerRecord) {
-        return customerRecordRepository.save(customerRecord);
-    }
-
-    public List<Map<String, String>> fetchCustomerRecords(int offset, int limit) {
-        Page<CustomerRecord> customerRecordsPage = customerRecordRepository.findAll(PageRequest.of(offset, limit));
-        List<Map<String, String>> customerRecords = customerRecordsPage.stream()
-                .map(this::convertCustomerRecordToMap)
-                .toList();
+    public List<CustomerRecordDto> fetchCustomerRecords(int offset, int limit) {
+        List<CustomerRecord> defaultFields = customerRecordRepository.findAll(PageRequest.of(offset, limit)).stream().toList();
         List<Map<String, String>> customFields = customFieldService.mapCustomFields(offset, limit);
 
-        List<Map<String, String>> customerRecordsMap = new ArrayList<>();
-        for (int i = 0; i < customerRecords.size() && i < customFields.size(); i++) {
-            customerRecordsMap.add(mergeMaps(List.of(customerRecords.get(i), customFields.get(i))));
+        List<CustomerRecordDto> customerRecords = new ArrayList<>();
+        for (int i = 0; i < defaultFields.size() && i < customFields.size(); i++) {
+            customerRecords.add(new CustomerRecordDto(defaultFields.get(i), customFields.get(i)));
         }
-        return customerRecordsMap;
+        return customerRecords;
     }
 
-    public Map<String, String> fetchCustomerRecordById(long id) {
+    public CustomerRecordDto fetchCustomerRecordById(long id) {
         Optional<CustomerRecord> customerRecord = customerRecordRepository.findById(id);
         if (customerRecord.isPresent()) {
-            return mergeMaps(List.of(convertCustomerRecordToMap(customerRecord.get()), customFieldService.mapCustomFields(id)));
+            return new CustomerRecordDto(customerRecord.get(), customFieldService.mapCustomFields(id));
         } else {
             throw new NoSuchElementException("There is no record with the Id of " + id);
         }
@@ -80,25 +71,5 @@ public class CustomerRecordService {
 
     private String getFilePath(String fileName) {
         return System.getProperty("user.dir") + "/src/main/resources/uploads/" + fileName;
-    }
-
-    private Map<String, String> convertCustomerRecordToMap(CustomerRecord customerRecord) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.convertValue(customerRecord, new TypeReference<>() {});
-    }
-
-    private Map<String, String> mergeMaps(List<Map<String, String>> mapList) {
-        return mapList.stream()
-                .flatMap(map -> map.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    public CustomerRecord getCustomerRecordById(long id) {
-        Optional<CustomerRecord> customerRecord = customerRecordRepository.findById(id);
-        if (customerRecord.isPresent()) {
-            return customerRecord.get();
-        } else {
-            throw new NoSuchElementException("There is no record with the Id of " + id);
-        }
     }
 }
