@@ -45,7 +45,7 @@ public class FileUploadProcess {
         }
     }
 
-    private void createCustomerRecordsAndFileUploadStatus(List<String[]> csvRecords, long fileUploadStatusId) {
+    private synchronized void createCustomerRecordsAndFileUploadStatus(List<String[]> csvRecords, long fileUploadStatusId) {
         String[] headers = csvRecords.remove(0);
         int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
         for (String[] record : csvRecords) {
