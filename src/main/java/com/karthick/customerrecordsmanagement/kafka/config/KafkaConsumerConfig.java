@@ -19,11 +19,11 @@ public class KafkaConsumerConfig {
     @Bean
     public ConsumerFactory<String, FileUploadEvent> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, Constants.KAFKA_BOOTSTRAP_SERVER);
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, Constants.GROUP_ID);
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, KafkaConstants.KAFKA_BOOTSTRAP_SERVER);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, KafkaConstants.GROUP_ID);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(JsonDeserializer.TRUSTED_PACKAGES, Constants.TRUSTED_PACKAGE);
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, KafkaConstants.TRUSTED_PACKAGE);
 
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>());
     }

@@ -9,6 +9,6 @@ import org.springframework.kafka.config.TopicBuilder;
 public class KafkaTopicConfig {
     @Bean
     public NewTopic newTopic() {
-        return TopicBuilder.name(Constants.TOPIC).partitions(1).replicas(1).build();
+        return TopicBuilder.name(KafkaConstants.TOPIC).partitions(1).replicas(1).build();
     }
 }

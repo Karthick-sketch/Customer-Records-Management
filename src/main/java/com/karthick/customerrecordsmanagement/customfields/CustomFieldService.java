@@ -25,23 +25,27 @@ public class CustomFieldService {
 
     public List<Map<String, String>> mapCustomFields(int offset, int limit) {
         Page<CustomField> customFields = customFieldRepository.findAll(PageRequest.of(offset, limit));
-        List<Map<String, String>> customFieldsMapList = new ArrayList<>();
-        for (CustomField customField : customFields) {
-            List<CustomFieldMapping> customFieldMapping = customFieldMappingRepository.findByCustomFieldId(customField.getId());
-            customFieldsMapList.add(convertCustomFieldsToMap(customField, customFieldMapping));
-        }
-        return customFieldsMapList;
+        return customFields.stream()
+                .map(cf -> convertCustomFieldsToMap(cf, customFieldMappingRepository.findByCustomFieldId(cf.getId())))
+                .toList();
     }
 
     public Map<String, String> mapCustomFields(long customerRecordId) {
         Optional<CustomField> customFieldOptional = customFieldRepository.findByCustomerRecordId(customerRecordId);
         if (customFieldOptional.isPresent()) {
             CustomField customField = customFieldOptional.get();
-            List<CustomFieldMapping> customFieldMapping = customFieldMappingRepository.findByCustomFieldId(customField.getId());
-            return convertCustomFieldsToMap(customField, customFieldMapping);
+            return convertCustomFieldsToMap(customField, customFieldMappingRepository.findByCustomFieldId(customField.getId()));
         } else {
             throw new NoSuchElementException("There are no custom fields present in the database with Id of " + customerRecordId);
         }
+    }
+
+    public List<Map<String, String>> mapCustomFieldsByAccountId(long accountId) {
+        return customFieldRepository.findByAccountId(accountId).stream()
+                .map(customField -> {
+                    List<CustomFieldMapping> customFieldMapping = customFieldMappingRepository.findByCustomFieldId(customField.getId());
+                    return convertCustomFieldsToMap(customField, customFieldMapping);
+                }).toList();
     }
 
     private Map<String, String> convertCustomFieldsToMap(CustomField customField, List<CustomFieldMapping> customFieldMapping) {

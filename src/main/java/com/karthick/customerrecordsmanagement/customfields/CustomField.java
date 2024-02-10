@@ -15,6 +15,7 @@ public class CustomField {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    private long accountId;
     private String field1;
     private String field2;
     private String field3;
@@ -26,6 +27,7 @@ public class CustomField {
     private CustomerRecord customerRecord;
 
     public CustomField(CustomerRecord customerRecord) {
+        this.accountId = customerRecord.getAccountId();
         this.customerRecord = customerRecord;
     }
 

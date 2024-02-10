@@ -1,7 +1,7 @@
 package com.karthick.customerrecordsmanagement.kafka;
 
-import com.karthick.customerrecordsmanagement.kafka.config.Constants;
 import com.karthick.customerrecordsmanagement.kafka.config.FileUploadEvent;
+import com.karthick.customerrecordsmanagement.kafka.config.KafkaConstants;
 import lombok.AllArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -19,7 +19,7 @@ public class KafkaProducer {
 
     public void publishKafkaMessage(long fileId, long fileUploadStatusId) {
         FileUploadEvent fileUploadEvent = new FileUploadEvent(fileId, fileUploadStatusId);
-        CompletableFuture<SendResult<String, FileUploadEvent>> future = kafkaTemplate.send(Constants.TOPIC, fileUploadEvent);
+        CompletableFuture<SendResult<String, FileUploadEvent>> future = kafkaTemplate.send(KafkaConstants.TOPIC, fileUploadEvent);
         future.whenComplete((result, ex) -> {
             if (ex == null) {
                 logger.info("Sent message=[" + fileUploadEvent + "] with offset=[" + result.getRecordMetadata().offset() + "]");

@@ -28,6 +28,11 @@ public class CustomerRecordController {
         return new ResponseEntity<>(customerRecordService.fetchCustomerRecordById(id), HttpStatus.OK);
     }
 
+    @GetMapping("/account/{accountId}")
+    public ResponseEntity<List<CustomerRecordDto>> getCustomerRecordByAccountId(@PathVariable long accountId) {
+        return new ResponseEntity<>(customerRecordService.fetchCustomerRecordByAccountId(accountId), HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<CustomerRecordDto> createCustomerRecord(@RequestBody CustomerRecordDto customerRecordDto) {
         return new ResponseEntity<>(customerRecordService.createNewCustomerRecord(customerRecordDto), HttpStatus.CREATED);

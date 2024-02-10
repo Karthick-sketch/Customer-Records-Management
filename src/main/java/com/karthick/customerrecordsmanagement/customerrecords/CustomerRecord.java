@@ -13,10 +13,9 @@ public class CustomerRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
+    private long accountId;
     @Column(unique = true, nullable = false)
     private String email;
-
     private String firstName;
     private String lastName;
     private String phoneNumber;

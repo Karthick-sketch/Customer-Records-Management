@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.IntStream;
 
 @Service
 @AllArgsConstructor
@@ -39,12 +40,9 @@ public class CustomerRecordService {
     public List<CustomerRecordDto> fetchCustomerRecords(int offset, int limit) {
         List<CustomerRecord> defaultFields = customerRecordRepository.findAll(PageRequest.of(offset, limit)).stream().toList();
         List<Map<String, String>> customFields = customFieldService.mapCustomFields(offset, limit);
-
-        List<CustomerRecordDto> customerRecords = new ArrayList<>();
-        for (int i = 0; i < defaultFields.size() && i < customFields.size(); i++) {
-            customerRecords.add(new CustomerRecordDto(defaultFields.get(i), customFields.get(i)));
-        }
-        return customerRecords;
+        return IntStream.range(0, defaultFields.size())
+                .mapToObj(i -> new CustomerRecordDto(defaultFields.get(i), customFields.get(i)))
+                .toList();
     }
 
     public CustomerRecordDto fetchCustomerRecordById(long id) {
@@ -54,6 +52,14 @@ public class CustomerRecordService {
         } else {
             throw new NoSuchElementException("There is no record with the Id of " + id);
         }
+    }
+
+    public List<CustomerRecordDto> fetchCustomerRecordByAccountId(long accountId) {
+        List<CustomerRecord> customerRecords = customerRecordRepository.findByAccountId(accountId);
+        List<Map<String, String>> customFields = customFieldService.mapCustomFieldsByAccountId(accountId);
+        return IntStream.range(0, customerRecords.size())
+                .mapToObj(i -> new CustomerRecordDto(customerRecords.get(i), customFields.get(i)))
+                .toList();
     }
 
     public FileUploadStatusDto uploadCsvFile(MultipartFile file) {
