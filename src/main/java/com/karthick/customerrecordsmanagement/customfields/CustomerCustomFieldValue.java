@@ -7,18 +7,22 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-@Entity(name = "custom_fields")
+@Entity(name = "customer_custom_field_values")
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
-public class CustomField {
+public class CustomerCustomFieldValue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @NonNull
-    private String fieldName;
+    private String customFieldValue;
     @NonNull
     @ManyToOne
-    @JoinColumn(name = "default_field_id")
+    @JoinColumn(name = "custom_field_id", referencedColumnName = "id")
+    private CustomField customField;
+    @NonNull
+    @ManyToOne
+    @JoinColumn(name = "customer_record_id", referencedColumnName = "id")
     private CustomerRecord customerRecord;
 }

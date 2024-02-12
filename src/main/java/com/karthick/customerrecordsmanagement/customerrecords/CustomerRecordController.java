@@ -38,7 +38,7 @@ public class CustomerRecordController {
         return new ResponseEntity<>(customerRecordService.createNewCustomerRecord(customerRecordDto), HttpStatus.CREATED);
     }
 
-    @PostMapping("/upload")
+    @PostMapping("/upload-csv")
     public ResponseEntity<FileUploadStatusDto> uploadCsvFile(@RequestPart("file") MultipartFile file) {
         return new ResponseEntity<>(customerRecordService.uploadCsvFile(file), HttpStatus.OK);
     }

@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.IntStream;
 
 @Service
 @AllArgsConstructor
@@ -38,27 +37,24 @@ public class CustomerRecordService {
     }
 
     public List<CustomerRecordDto> fetchCustomerRecords(int offset, int limit) {
-        List<CustomerRecord> defaultFields = customerRecordRepository.findAll(PageRequest.of(offset, limit)).stream().toList();
-        List<Map<String, String>> customFields = customFieldService.mapCustomFields(offset, limit);
-        return IntStream.range(0, defaultFields.size())
-                .mapToObj(i -> new CustomerRecordDto(defaultFields.get(i), customFields.get(i)))
+        List<CustomerRecord> customerRecords = customerRecordRepository.findAll(PageRequest.of(offset, limit)).stream().toList();
+        return customerRecords.stream()
+                .map(cr -> new CustomerRecordDto(cr, customFieldService.mapCustomFields(cr.getId())))
                 .toList();
     }
 
     public CustomerRecordDto fetchCustomerRecordById(long id) {
         Optional<CustomerRecord> customerRecord = customerRecordRepository.findById(id);
-        if (customerRecord.isPresent()) {
-            return new CustomerRecordDto(customerRecord.get(), customFieldService.mapCustomFields(id));
-        } else {
+        if (customerRecord.isEmpty()) {
             throw new NoSuchElementException("There is no record with the Id of " + id);
         }
+        return new CustomerRecordDto(customerRecord.get(), customFieldService.mapCustomFields(id));
     }
 
     public List<CustomerRecordDto> fetchCustomerRecordByAccountId(long accountId) {
         List<CustomerRecord> customerRecords = customerRecordRepository.findByAccountId(accountId);
-        List<Map<String, String>> customFields = customFieldService.mapCustomFieldsByAccountId(accountId);
-        return IntStream.range(0, customerRecords.size())
-                .mapToObj(i -> new CustomerRecordDto(customerRecords.get(i), customFields.get(i)))
+        return customerRecords.stream()
+                .map(cr -> new CustomerRecordDto(cr, customFieldService.mapCustomFields(cr.getId())))
                 .toList();
     }
 

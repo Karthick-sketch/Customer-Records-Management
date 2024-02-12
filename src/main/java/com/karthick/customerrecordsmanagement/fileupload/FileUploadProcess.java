@@ -66,8 +66,8 @@ public class FileUploadProcess {
 
     private CustomerRecordDto mapDefaultAndCustomFields(String[] headers, String[] records) {
         List<String> fieldNames = CustomerRecord.getFields();
-        Map<String, String> defaultFields = new HashMap<>();
-        Map<String, String> customFields = new HashMap<>();
+        Map<String, String> defaultFields = new LinkedHashMap<>();
+        Map<String, String> customFields = new LinkedHashMap<>();
         for (int i = 0; i < headers.length && i < records.length; i++) {
             String key = headers[i], value = records[i];
             if (fieldNames.contains(key)) {
