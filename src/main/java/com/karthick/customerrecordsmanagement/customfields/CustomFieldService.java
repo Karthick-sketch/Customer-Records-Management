@@ -13,6 +13,10 @@ public class CustomFieldService {
     private CustomFieldRepository customFieldRepository;
     private CustomerCustomFieldValueRepository customerCustomFieldValueRepository;
 
+    public List<CustomField> fetchCustomFields(long customerRecordId) {
+        return customFieldRepository.findByCustomerRecordId(customerRecordId);
+    }
+
     public void createCustomFields(CustomerRecord customerRecord, Map<String, String> customFieldsMap) {
         customFieldsMap.forEach((key, value) -> {
             CustomField customField = customFieldRepository.save(new CustomField(key, customerRecord));
@@ -21,8 +25,7 @@ public class CustomFieldService {
     }
 
     public Map<String, String> mapCustomFields(long customerRecordId) {
-        List<CustomField> customFields = customFieldRepository.findByCustomerRecordId(customerRecordId);
-        return customFields.stream()
+        return fetchCustomFields(customerRecordId).stream()
                 .collect(Collectors.toMap(CustomField::getFieldName,
                         cf -> customerCustomFieldValueRepository.findByCustomerRecordIdAndCustomFieldId(customerRecordId, cf.getId()).getCustomFieldValue()
                 ));
