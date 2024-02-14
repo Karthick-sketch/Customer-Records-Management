@@ -1,8 +1,8 @@
-accountId,firstName,lastName,companyName,address,city,country,state,zipcode,phoneNumber,email,age,gender,points
-1,James,Butt,"Benton, John B Jr",6649 N Blue Gum St,New Orleans,Orleans,LA,70116,504-845-1427,jbutt@gmail.com,28,male,180
-1,Josephine,Darakjy,"Chanay, Jeffrey A Esq",4 B Blue Ridge Blvd,Brighton,Livingston,MI,48116,810-374-9840,josephine_darakjy@darakjy.org,27,female,150
-1,Art,Venere,"Chemel, James L Cpa",8 W Cerritos Ave #54,Bridgeport,Gloucester,NJ,8014,856-264-4130,art@venere.org,25,male,100
-1,Lenna,Paprocki,Feltz Printing Service,639 Main St,Anchorage,Anchorage,AK,99501,907-921-2010,lpaprocki@hotmail.com,30,female,250
-1,Donette,Foller,Printing Dimensions,34 Center St,Hamilton,Butler,OH,45011,513-549-4561,donette.foller@cox.net,25,male,130
-1,Sage,Wieser,Truhlar And Truhlar Attys,5 Boston Ave #88,Sioux Falls,Minnehaha,SD,57105,605-794-4895,sage_wieser@cox.net,30,male,200
-1,Kris,Marrier,"King, Christopher A Esq",228 Runamuck Pl #2808,Baltimore,Baltimore City,MD,21224,410-804-4694,kris@gmail.com,25,male,100
+firstName,lastName,companyName,address,city,country,state,zipcode,phoneNumber,email,age,gender,points
+James,Butt,"Benton, John B Jr",6649 N Blue Gum St,New Orleans,Orleans,LA,70116,504-845-1427,jbutt@gmail.com,28,male,180
+Josephine,Darakjy,"Chanay, Jeffrey A Esq",4 B Blue Ridge Blvd,Brighton,Livingston,MI,48116,810-374-9840,josephine_darakjy@darakjy.org,27,female,150
+Art,Venere,"Chemel, James L Cpa",8 W Cerritos Ave #54,Bridgeport,Gloucester,NJ,8014,856-264-4130,art@venere.org,25,male,100
+Lenna,Paprocki,Feltz Printing Service,639 Main St,Anchorage,Anchorage,AK,99501,907-921-2010,lpaprocki@hotmail.com,30,female,250
+Donette,Foller,Printing Dimensions,34 Center St,Hamilton,Butler,OH,45011,513-549-4561,donette.foller@cox.net,25,male,130
+Sage,Wieser,Truhlar And Truhlar Attys,5 Boston Ave #88,Sioux Falls,Minnehaha,SD,57105,605-794-4895,sage_wieser@cox.net,30,male,200
+Kris,Marrier,"King, Christopher A Esq",228 Runamuck Pl #2808,Baltimore,Baltimore City,MD,21224,410-804-4694,kris@gmail.com,25,male,100

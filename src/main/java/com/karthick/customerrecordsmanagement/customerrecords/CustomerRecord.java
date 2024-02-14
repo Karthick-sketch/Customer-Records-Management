@@ -7,14 +7,15 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.stream.Stream;
 
-@Entity(name = "customer_records")
 @Data
+@Entity(name = "customer_records")
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId", "email"})})
 public class CustomerRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private long accountId;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String email;
     private String firstName;
     private String lastName;
@@ -24,7 +25,7 @@ public class CustomerRecord {
     private String city;
     private String state;
     private String country;
-    private int zipcode;
+    private Integer zipcode;
 
     public static List<String> getFields() {
         return Stream.of(CustomerRecord.class.getDeclaredFields())
