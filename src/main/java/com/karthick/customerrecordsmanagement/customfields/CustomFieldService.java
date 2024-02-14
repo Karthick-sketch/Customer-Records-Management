@@ -13,19 +13,27 @@ public class CustomFieldService {
     private CustomFieldRepository customFieldRepository;
     private CustomerCustomFieldValueRepository customerCustomFieldValueRepository;
 
-    public List<CustomField> fetchCustomFields(long customerRecordId) {
-        return customFieldRepository.findByCustomerRecordId(customerRecordId);
+    public CustomField createCustomField(CustomField customField) {
+        return customFieldRepository.save(customField);
+    }
+
+    public List<CustomField> fetchCustomFieldsByAccountId(long accountId) {
+        return customFieldRepository.findByAccountId(accountId);
     }
 
     public void createCustomFields(CustomerRecord customerRecord, Map<String, String> customFieldsMap) {
         customFieldsMap.forEach((key, value) -> {
-            CustomField customField = customFieldRepository.save(new CustomField(key, customerRecord));
-            customerCustomFieldValueRepository.save(new CustomerCustomFieldValue(value, customField, customerRecord));
+            Optional<CustomField> customField = customFieldRepository.findByAccountIdAndFieldName(customerRecord.getAccountId(), key);
+            if (customField.isEmpty()) {
+                throw new NoSuchElementException("There is no custom field called " + key);
+            }
+            CustomerCustomFieldValue customFieldValue = new CustomerCustomFieldValue(customerRecord.getAccountId(), value, customField.get(), customerRecord);
+            customerCustomFieldValueRepository.save(customFieldValue);
         });
     }
 
-    public Map<String, String> mapCustomFields(long customerRecordId) {
-        return fetchCustomFields(customerRecordId).stream()
+    public Map<String, String> mapCustomFields(long accountId, long customerRecordId) {
+        return fetchCustomFieldsByAccountId(accountId).stream()
                 .collect(Collectors.toMap(CustomField::getFieldName,
                         cf -> customerCustomFieldValueRepository.findByCustomerRecordIdAndCustomFieldId(customerRecordId, cf.getId()).getCustomFieldValue()
                 ));

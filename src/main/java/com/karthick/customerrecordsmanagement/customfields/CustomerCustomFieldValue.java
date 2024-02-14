@@ -16,6 +16,8 @@ public class CustomerCustomFieldValue {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @NonNull
+    private Long accountId;
+    @NonNull
     private String customFieldValue;
     @NonNull
     @ManyToOne
