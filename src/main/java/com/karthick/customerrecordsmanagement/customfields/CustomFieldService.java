@@ -35,7 +35,7 @@ public class CustomFieldService {
     public Map<String, String> mapCustomFields(long accountId, long customerRecordId) {
         return fetchCustomFieldsByAccountId(accountId).stream()
                 .collect(Collectors.toMap(CustomField::getFieldName,
-                        cf -> customerCustomFieldValueRepository.findByCustomerRecordIdAndCustomFieldId(customerRecordId, cf.getId()).getCustomFieldValue()
+                        cf -> customerCustomFieldValueRepository.findByAccountIdAndCustomerRecordIdAndCustomFieldId(accountId, customerRecordId, cf.getId()).getCustomFieldValue()
                 ));
     }
 }

@@ -13,7 +13,7 @@ import java.util.List;
 public class CustomFieldController {
     private CustomFieldService customFieldService;
 
-    @GetMapping("/{accountId}")
+    @GetMapping("/account/{accountId}")
     public ResponseEntity<List<CustomField>> getCustomFields(@PathVariable long accountId) {
         return new ResponseEntity<>(customFieldService.fetchCustomFieldsByAccountId(accountId), HttpStatus.OK);
     }

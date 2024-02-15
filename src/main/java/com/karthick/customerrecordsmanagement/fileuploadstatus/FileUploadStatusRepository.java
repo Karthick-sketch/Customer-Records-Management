@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface FileUploadStatusRepository extends JpaRepository<FileUploadStatus, Long> {
-    List<FileUploadStatus> findFileUploadStatusByAccountId(long accountId);
+    List<FileUploadStatus> findByAccountId(long accountId);
 
-    Optional<FileUploadStatus> findFileUploadStatusByIdAndAccountId(long id, long accountId);
+    Optional<FileUploadStatus> findByIdAndAccountId(long id, long accountId);
 }

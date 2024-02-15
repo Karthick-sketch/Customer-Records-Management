@@ -23,25 +23,18 @@ public class CustomerRecordService {
         return customerRecordDto;
     }
 
-    public List<CustomerRecordDto> fetchCustomerRecords(int pageNumber, int pageSize) {
-        Page<CustomerRecord> customerRecords = customerRecordRepository.findAll(PageRequest.of(pageNumber, pageSize).withSort(Sort.by("email")));
+    public List<CustomerRecordDto> fetchCustomerRecords(long accountId, int pageNumber, int pageSize) {
+        Page<CustomerRecord> customerRecords = customerRecordRepository.findByAccountId(accountId, PageRequest.of(pageNumber, pageSize).withSort(Sort.by("email")));
         return customerRecords.stream()
                 .map(cr -> new CustomerRecordDto(cr, customFieldService.mapCustomFields(cr.getAccountId(), cr.getId())))
                 .toList();
     }
 
-    public CustomerRecordDto fetchCustomerRecordById(long id) {
-        Optional<CustomerRecord> customerRecord = customerRecordRepository.findById(id);
+    public CustomerRecordDto fetchCustomerRecordByIdAndAccountId(long id, long accountId) {
+        Optional<CustomerRecord> customerRecord = customerRecordRepository.findByIdAndAccountId(id, accountId);
         if (customerRecord.isEmpty()) {
             throw new NoSuchElementException("There is no record with the Id of " + id);
         }
-        return new CustomerRecordDto(customerRecord.get(), customFieldService.mapCustomFields(customerRecord.get().getAccountId(), id));
-    }
-
-    public List<CustomerRecordDto> fetchCustomerRecordByAccountId(long accountId) {
-        List<CustomerRecord> customerRecords = customerRecordRepository.findByAccountId(accountId);
-        return customerRecords.stream()
-                .map(cr -> new CustomerRecordDto(cr, customFieldService.mapCustomFields(accountId, cr.getId())))
-                .toList();
+        return new CustomerRecordDto(customerRecord.get(), customFieldService.mapCustomFields(accountId, id));
     }
 }

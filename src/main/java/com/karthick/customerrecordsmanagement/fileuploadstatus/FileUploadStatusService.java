@@ -26,11 +26,11 @@ public class FileUploadStatusService {
     private final Logger logger = Logger.getLogger(FileUploadStatusService.class.getName());
 
     public List<FileUploadStatus> fetchFileUploadStatusByAccountId(long accountId) {
-        return fileUploadStatusRepository.findFileUploadStatusByAccountId(accountId);
+        return fileUploadStatusRepository.findByAccountId(accountId);
     }
 
     public FileUploadStatus fetchFileUploadStatusByIdAndAccountId(long id, long accountId) {
-        Optional<FileUploadStatus> fileUploadStatus = fileUploadStatusRepository.findFileUploadStatusByIdAndAccountId(id, accountId);
+        Optional<FileUploadStatus> fileUploadStatus = fileUploadStatusRepository.findByIdAndAccountId(id, accountId);
         if (fileUploadStatus.isEmpty()) {
             throw new NoSuchElementException("The uploaded file status with the Id of " + id + " is not found");
         }

@@ -13,19 +13,14 @@ import java.util.List;
 public class CustomerRecordController {
     private CustomerRecordService customerRecordService;
 
-    @GetMapping
-    public ResponseEntity<List<CustomerRecordDto>> getCustomerRecordsWithPagination(@RequestParam int pageNumber, int pageSize) {
-        return new ResponseEntity<>(customerRecordService.fetchCustomerRecords(pageNumber-1, pageSize), HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<CustomerRecordDto> getCustomerRecordById(@PathVariable long id) {
-        return new ResponseEntity<>(customerRecordService.fetchCustomerRecordById(id), HttpStatus.OK);
-    }
-
     @GetMapping("/account/{accountId}")
-    public ResponseEntity<List<CustomerRecordDto>> getCustomerRecordByAccountId(@PathVariable long accountId) {
-        return new ResponseEntity<>(customerRecordService.fetchCustomerRecordByAccountId(accountId), HttpStatus.OK);
+    public ResponseEntity<List<CustomerRecordDto>> getCustomerRecordsWithPagination(@PathVariable long accountId, @RequestParam int pageNumber, int pageSize) {
+        return new ResponseEntity<>(customerRecordService.fetchCustomerRecords(accountId, pageNumber-1, pageSize), HttpStatus.OK);
+    }
+
+    @GetMapping("/account/{accountId}/id/{id}")
+    public ResponseEntity<CustomerRecordDto> getCustomerRecordById(@PathVariable long accountId, @PathVariable long id) {
+        return new ResponseEntity<>(customerRecordService.fetchCustomerRecordByIdAndAccountId(id, accountId), HttpStatus.OK);
     }
 
     @PostMapping

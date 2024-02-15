@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CustomerCustomFieldValueRepository extends JpaRepository<CustomerCustomFieldValue, Long> {
-    CustomerCustomFieldValue findByCustomerRecordIdAndCustomFieldId(long customerRecordId, long customFieldId);
+    CustomerCustomFieldValue findByAccountIdAndCustomerRecordIdAndCustomFieldId(long accountId, long customerRecordId, long customFieldId);
 }
