@@ -22,28 +22,19 @@ public class CustomerRecordService {
         return customerRecordDto;
     }
 
-    public List<CustomerRecordDto> fetchCustomerRecords(int pageNumber, int pageSize) {
+    public List<CustomerRecordDto> fetchCustomerRecords(long accountId, int pageNumber, int pageSize) {
         List<CustomerRecord> defaultFields = customerRecordRepository.findAll(PageRequest.of(pageNumber, pageSize)).stream().toList();
-        List<Map<String, String>> customFields = customFieldService.mapCustomFields(pageNumber, pageSize);
+        List<Map<String, String>> customFields = customFieldService.mapCustomFieldsByPagination(accountId, pageNumber, pageSize);
         return IntStream.range(0, defaultFields.size())
                 .mapToObj(i -> new CustomerRecordDto(defaultFields.get(i), customFields.get(i)))
                 .toList();
     }
 
-    public CustomerRecordDto fetchCustomerRecordById(long id) {
-        Optional<CustomerRecord> customerRecord = customerRecordRepository.findById(id);
-        if (customerRecord.isPresent()) {
-            return new CustomerRecordDto(customerRecord.get(), customFieldService.mapCustomFields(id));
-        } else {
+    public CustomerRecordDto fetchCustomerRecordByIdAndAccountId(long id, long accountId) {
+        Optional<CustomerRecord> customerRecord = customerRecordRepository.findByIdAndAccountId(id, accountId);
+        if (customerRecord.isEmpty()) {
             throw new NoSuchElementException("There is no record with the Id of " + id);
         }
-    }
-
-    public List<CustomerRecordDto> fetchCustomerRecordByAccountId(long accountId) {
-        List<CustomerRecord> customerRecords = customerRecordRepository.findByAccountId(accountId);
-        List<Map<String, String>> customFields = customFieldService.mapCustomFieldsByAccountId(accountId);
-        return IntStream.range(0, customerRecords.size())
-                .mapToObj(i -> new CustomerRecordDto(customerRecords.get(i), customFields.get(i)))
-                .toList();
+        return new CustomerRecordDto(customerRecord.get(), customFieldService.mapCustomFields(accountId, id));
     }
 }

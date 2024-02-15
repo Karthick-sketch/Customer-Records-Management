@@ -7,7 +7,5 @@ import java.util.List;
 
 @Repository
 public interface CustomFieldMappingRepository extends JpaRepository<CustomFieldMapping, Long> {
-    List<CustomFieldMapping> findByCustomFieldId(long customFieldId);
-
-    List<CustomFieldMapping> findByAccountId(long accountId);
+    List<CustomFieldMapping> findByAccountIdAndCustomFieldId(long accountId, long customFieldId);
 }

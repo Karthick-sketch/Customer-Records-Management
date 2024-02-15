@@ -1,5 +1,7 @@
 package com.karthick.customerrecordsmanagement.customfields;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -11,4 +13,6 @@ public interface CustomFieldRepository extends JpaRepository<CustomField, Long> 
     Optional<CustomField> findByCustomerRecordId(long customerRecordId);
 
     List<CustomField> findByAccountId(long accountId);
+
+    Page<CustomField> findByAccountId(long accountId, Pageable pageable);
 }
