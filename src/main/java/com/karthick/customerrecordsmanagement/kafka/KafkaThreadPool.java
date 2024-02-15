@@ -33,9 +33,10 @@ public class KafkaThreadPool {
 
         @Override
         public void run() {
+            long accountId = fileUploadEvent.getAccountId();
             long csvFileDetailId = fileUploadEvent.getCsvFileDetailId();
             long fileUploadStatusId = fileUploadEvent.getFileUploadStatusId();
-            fileUploadProcess.pushCustomerRecordsFromFileToDatabase(csvFileDetailId, fileUploadStatusId);
+            fileUploadProcess.pushCustomerRecordsFromFileToDatabase(accountId, csvFileDetailId, fileUploadStatusId);
         }
     }
 }

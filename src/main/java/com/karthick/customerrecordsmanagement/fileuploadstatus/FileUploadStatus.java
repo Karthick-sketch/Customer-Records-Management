@@ -18,6 +18,8 @@ public class FileUploadStatus {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @NonNull
+    private Long accountId;
+    @NonNull
     private String fileName;
     private int totalRecords;
     private int uploadedRecords;
