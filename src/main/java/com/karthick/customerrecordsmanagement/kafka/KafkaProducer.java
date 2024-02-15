@@ -17,8 +17,8 @@ public class KafkaProducer {
 
     private final Logger logger = Logger.getLogger(KafkaProducer.class.getName());
 
-    public void publishKafkaMessage(long fileId, long fileUploadStatusId) {
-        FileUploadEvent fileUploadEvent = new FileUploadEvent(fileId, fileUploadStatusId);
+    public void publishKafkaMessage(long accountId, long fileId, long fileUploadStatusId) {
+        FileUploadEvent fileUploadEvent = new FileUploadEvent(accountId, fileId, fileUploadStatusId);
         CompletableFuture<SendResult<String, FileUploadEvent>> future = kafkaTemplate.send(KafkaConstants.TOPIC, fileUploadEvent);
         future.whenComplete((result, ex) -> {
             if (ex == null) {

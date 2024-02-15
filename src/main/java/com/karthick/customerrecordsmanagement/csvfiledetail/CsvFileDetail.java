@@ -18,9 +18,9 @@ public class CsvFileDetail {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @NonNull
-    private String fileName;
+    private Long accountId;
     @NonNull
-    private String contentType;
+    private String fileName;
     @NonNull
     private String filePath;
 }

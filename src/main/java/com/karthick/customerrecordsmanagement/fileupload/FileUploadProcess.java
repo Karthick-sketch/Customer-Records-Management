@@ -32,11 +32,11 @@ public class FileUploadProcess {
 
     private final Logger logger = Logger.getLogger(FileUploadProcess.class.getName());
 
-    public void pushCustomerRecordsFromFileToDatabase(long fileId, long fileUploadStatusId) {
+    public void pushCustomerRecordsFromFileToDatabase(long accountId, long fileId, long fileUploadStatusId) {
         CsvFileDetail csvFileDetail = csvFileDetailService.fetchCsvFileDetailById(fileId);
         List<String[]> csvRecords = readCsvFile(csvFileDetail.getFilePath());
         if (csvRecords != null) {
-            createCustomerRecordsAndFileUploadStatus(csvRecords, fileUploadStatusId);
+            createCustomerRecordsAndFileUploadStatus(accountId, csvRecords, fileUploadStatusId);
         } else {
             logger.warning(csvFileDetail.getFileName() + " file is empty");
         }
@@ -45,7 +45,7 @@ public class FileUploadProcess {
         }
     }
 
-    private synchronized void createCustomerRecordsAndFileUploadStatus(List<String[]> csvRecords, long fileUploadStatusId) {
+    private synchronized void createCustomerRecordsAndFileUploadStatus(long accountId, List<String[]> csvRecords, long fileUploadStatusId) {
         String[] headers = csvRecords.remove(0);
         int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
         for (String[] record : csvRecords) {
@@ -61,13 +61,13 @@ public class FileUploadProcess {
                 logger.warning("Exception in Customer record creation. Error : " + e.getMessage());
             }
         }
-        fileUploadStatusService.updateFileUploadStatus(fileUploadStatusId, csvRecords.size(), uploadedRecords, duplicateRecords, invalidRecords);
+        fileUploadStatusService.updateFileUploadStatus(accountId, fileUploadStatusId, csvRecords.size(), uploadedRecords, duplicateRecords, invalidRecords);
     }
 
     private CustomerRecordDto mapDefaultAndCustomFields(String[] headers, String[] records) {
         List<String> fieldNames = CustomerRecord.getFields();
-        Map<String, String> defaultFields = new HashMap<>();
-        Map<String, String> customFields = new HashMap<>();
+        Map<String, String> defaultFields = new LinkedHashMap<>();
+        Map<String, String> customFields = new LinkedHashMap<>();
         for (int i = 0; i < headers.length && i < records.length; i++) {
             String key = headers[i], value = records[i];
             if (fieldNames.contains(key)) {

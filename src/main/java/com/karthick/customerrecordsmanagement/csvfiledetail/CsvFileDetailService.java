@@ -19,7 +19,7 @@ public class CsvFileDetailService {
         return csvFileDetail.get();
     }
 
-    public CsvFileDetail saveCsvFileDetail(String fileName, String fileType, String filePath) {
-        return csvFileDetailRepository.save(new CsvFileDetail(fileName, fileType, filePath));
+    public CsvFileDetail saveCsvFileDetail(long accountId, String fileName, String filePath) {
+        return csvFileDetailRepository.save(new CsvFileDetail(accountId, fileName, filePath));
     }
 }

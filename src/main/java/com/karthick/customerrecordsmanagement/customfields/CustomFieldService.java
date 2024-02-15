@@ -23,8 +23,8 @@ public class CustomFieldService {
         });
     }
 
-    public List<Map<String, String>> mapCustomFields(int offset, int limit) {
-        Page<CustomField> customFields = customFieldRepository.findAll(PageRequest.of(offset, limit));
+    public List<Map<String, String>> mapCustomFields(int pageNumber, int pageSize) {
+        Page<CustomField> customFields = customFieldRepository.findAll(PageRequest.of(pageNumber, pageSize));
         return customFields.stream()
                 .map(cf -> convertCustomFieldsToMap(cf, customFieldMappingRepository.findByCustomFieldId(cf.getId())))
                 .toList();
