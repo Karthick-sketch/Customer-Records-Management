@@ -36,7 +36,8 @@ public class FileUploadProcess {
         CsvFileDetail csvFileDetail = csvFileDetailService.fetchCsvFileDetailById(fileId);
         List<String[]> csvRecords = readCsvFile(csvFileDetail.getFilePath());
         if (csvRecords != null) {
-            createCustomerRecordsAndFileUploadStatus(accountId, csvRecords, fileUploadStatusId);
+            // createCustomerRecordsAndFileUploadStatus(accountId, csvRecords, fileUploadStatusId);
+            createAllCustomerRecordsAndFileUploadStatus(accountId, csvRecords, fileUploadStatusId);
         } else {
             logger.warning(csvFileDetail.getFileName() + " file is empty");
         }
@@ -50,7 +51,7 @@ public class FileUploadProcess {
         int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
         for (String[] record : csvRecords) {
             try {
-                customerRecordService.createCustomerRecord(mapDefaultAndCustomFields(headers, record));
+                customerRecordService.createCustomerRecord(mapDefaultAndCustomFields(accountId, headers, record));
                 uploadedRecords++;
             } catch (DataIntegrityViolationException e) {
                 if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
@@ -64,7 +65,25 @@ public class FileUploadProcess {
         fileUploadStatusService.updateFileUploadStatus(accountId, fileUploadStatusId, csvRecords.size(), uploadedRecords, duplicateRecords, invalidRecords);
     }
 
-    private CustomerRecordDto mapDefaultAndCustomFields(String[] headers, String[] records) {
+    private synchronized void createAllCustomerRecordsAndFileUploadStatus(long accountId, List<String[]> csvRecords, long fileUploadStatusId) {
+        int capacity = 10;
+        String[] headers = csvRecords.remove(0);
+        List<CustomerRecordDto> customerRecordDto = new ArrayList<>(capacity);
+        for (int i = 1; i <= csvRecords.size(); i++) {
+            customerRecordDto.add(mapDefaultAndCustomFields(accountId, headers, csvRecords.get(i-1)));
+            if (i == csvRecords.size() || i % capacity == 0) {
+                try {
+                    customerRecordService.createAllCustomerRecord(customerRecordDto);
+                } catch (Exception e) {
+                    logger.warning("Exception in Customer record creation. Error : " + e.getMessage());
+                }
+                customerRecordDto.clear();
+            }
+        }
+        fileUploadStatusService.updateFileUploadStatus(accountId, fileUploadStatusId, csvRecords.size(), 0, 0, 0);
+    }
+
+    private CustomerRecordDto mapDefaultAndCustomFields(long accountId, String[] headers, String[] records) {
         List<String> fieldNames = CustomerRecord.getFields();
         Map<String, String> defaultFields = new LinkedHashMap<>();
         Map<String, String> customFields = new LinkedHashMap<>();
@@ -76,7 +95,9 @@ public class FileUploadProcess {
                 customFields.put(key, value);
             }
         }
-        return new CustomerRecordDto(mapToCustomerRecord(defaultFields), customFields);
+        CustomerRecord customerRecord = mapToCustomerRecord(defaultFields);
+        customerRecord.setAccountId(accountId);
+        return new CustomerRecordDto(customerRecord, customFields);
     }
 
     private CustomerRecord mapToCustomerRecord(Map<String, String> defaultFields) {

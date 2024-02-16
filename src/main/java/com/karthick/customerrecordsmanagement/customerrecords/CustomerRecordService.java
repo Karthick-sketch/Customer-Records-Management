@@ -17,19 +17,6 @@ public class CustomerRecordService {
     private CustomerRecordRepository customerRecordRepository;
     private CustomFieldService customFieldService;
 
-    public CustomerRecordDto createCustomerRecord(CustomerRecordDto customerRecordDto) {
-        CustomerRecord customerRecord = customerRecordDto.getCustomerRecord();
-        long accountId = customerRecord.getAccountId();
-        List<CustomerCustomFieldValue> customFieldValues = customerRecordDto.getCustomFields().entrySet().stream()
-                .map(entry -> {
-                    CustomField customField = customFieldService.fetchCustomFieldByAccountIdAndFieldName(accountId, entry.getKey());
-                    return new CustomerCustomFieldValue(accountId, entry.getValue(), customField, customerRecord);
-                }).toList();
-        customerRecord.setCustomerCustomFieldValues(customFieldValues);
-        customerRecordRepository.save(customerRecord);
-        return customerRecordDto;
-    }
-
     public List<CustomerRecordDto> fetchCustomerRecords(long accountId, int pageNumber, int pageSize) {
         Page<CustomerRecord> customerRecords = customerRecordRepository.findByAccountId(accountId, PageRequest.of(pageNumber, pageSize).withSort(Sort.by("email")));
         return customerRecords.stream()
@@ -43,5 +30,27 @@ public class CustomerRecordService {
             throw new NoSuchElementException("There is no record with the Id of " + id);
         }
         return new CustomerRecordDto(customerRecord.get(), customFieldService.mapCustomFields(accountId, id));
+    }
+
+    public CustomerRecordDto createCustomerRecord(CustomerRecordDto customerRecordDto) {
+        customerRecordDto.setCustomerRecord(customerRecordRepository.save(mapCustomerRecord(customerRecordDto)));
+        return customerRecordDto;
+    }
+
+    public void createAllCustomerRecord(List<CustomerRecordDto> customerRecordDtos) {
+        List<CustomerRecord> customerRecords = customerRecordDtos.stream()
+                .map(this::mapCustomerRecord)
+                .toList();
+        customerRecordRepository.saveAll(customerRecords);
+    }
+
+    private CustomerRecord mapCustomerRecord(CustomerRecordDto customerRecordDto) {
+        CustomerRecord customerRecord = customerRecordDto.getCustomerRecord();
+        customerRecord.setCustomerCustomFieldValues(customerRecordDto.getCustomFields().entrySet().stream()
+                .map(entry -> {
+                    CustomField customField = customFieldService.fetchCustomFieldByAccountIdAndFieldName(customerRecord.getAccountId(), entry.getKey());
+                    return new CustomerCustomFieldValue(customerRecord.getAccountId(), entry.getValue(), customField, customerRecord);
+                }).toList());
+        return customerRecord;
     }
 }
