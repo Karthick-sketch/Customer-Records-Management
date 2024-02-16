@@ -1,12 +1,13 @@
 package com.karthick.customerrecordsmanagement.customerrecords;
 
+import com.karthick.customerrecordsmanagement.customfields.CustomField;
 import com.karthick.customerrecordsmanagement.customfields.CustomFieldService;
+import com.karthick.customerrecordsmanagement.customfields.CustomerCustomFieldValue;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -16,10 +17,16 @@ public class CustomerRecordService {
     private CustomerRecordRepository customerRecordRepository;
     private CustomFieldService customFieldService;
 
-    @Transactional
-    public CustomerRecordDto createNewCustomerRecord(CustomerRecordDto customerRecordDto) {
-        CustomerRecord customerRecord = customerRecordRepository.save(customerRecordDto.getDefaultFields());
-        customFieldService.createCustomFields(customerRecord, customerRecordDto.getCustomFields());
+    public CustomerRecordDto createCustomerRecord(CustomerRecordDto customerRecordDto) {
+        CustomerRecord customerRecord = customerRecordDto.getCustomerRecord();
+        long accountId = customerRecord.getAccountId();
+        List<CustomerCustomFieldValue> customFieldValues = customerRecordDto.getCustomFields().entrySet().stream()
+                .map(entry -> {
+                    CustomField customField = customFieldService.fetchCustomFieldByAccountIdAndFieldName(accountId, entry.getKey());
+                    return new CustomerCustomFieldValue(accountId, entry.getValue(), customField, customerRecord);
+                }).toList();
+        customerRecord.setCustomerCustomFieldValues(customFieldValues);
+        customerRecordRepository.save(customerRecord);
         return customerRecordDto;
     }
 

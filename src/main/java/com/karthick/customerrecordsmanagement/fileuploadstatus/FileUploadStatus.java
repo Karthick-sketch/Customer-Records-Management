@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-@Entity(name = "file_upload_status")
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
+@Entity(name = "file_upload_status")
 public class FileUploadStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

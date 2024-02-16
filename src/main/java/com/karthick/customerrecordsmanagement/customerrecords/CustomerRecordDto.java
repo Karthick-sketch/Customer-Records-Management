@@ -10,6 +10,6 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomerRecordDto {
-    private CustomerRecord defaultFields;
+    private CustomerRecord customerRecord;
     private Map<String, String> customFields;
 }

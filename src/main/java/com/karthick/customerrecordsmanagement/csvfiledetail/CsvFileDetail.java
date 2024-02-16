@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-@Entity(name = "csv_file_details")
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
+@Entity(name = "csv_file_details")
 public class CsvFileDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

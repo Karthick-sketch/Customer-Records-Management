@@ -50,7 +50,7 @@ public class FileUploadProcess {
         int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
         for (String[] record : csvRecords) {
             try {
-                customerRecordService.createNewCustomerRecord(mapDefaultAndCustomFields(headers, record));
+                customerRecordService.createCustomerRecord(mapDefaultAndCustomFields(headers, record));
                 uploadedRecords++;
             } catch (DataIntegrityViolationException e) {
                 if (e.getCause().getClass().equals(ConstraintViolationException.class)) {

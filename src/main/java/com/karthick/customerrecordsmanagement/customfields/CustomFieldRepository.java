@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface CustomFieldRepository extends JpaRepository<CustomField, Long> {
     List<CustomField> findByAccountId(long accountId);
 
-    Optional<CustomField> findByAccountIdAndFieldName(long accountId, String key);
+    Optional<CustomField> findByAccountIdAndFieldName(long accountId, String fieldName);
 }

@@ -6,10 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-@Entity(name = "custom_fields")
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
+@Entity(name = "custom_fields")
 public class CustomField {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

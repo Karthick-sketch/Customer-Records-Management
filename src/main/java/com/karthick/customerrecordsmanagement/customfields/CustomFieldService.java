@@ -21,13 +21,18 @@ public class CustomFieldService {
         return customFieldRepository.findByAccountId(accountId);
     }
 
+    public CustomField fetchCustomFieldByAccountIdAndFieldName(long accountId, String fieldName) {
+        Optional<CustomField> customField = customFieldRepository.findByAccountIdAndFieldName(accountId, fieldName);
+        if (customField.isEmpty()) {
+            throw new NoSuchElementException("There is no custom field called " + fieldName);
+        }
+        return customField.get();
+    }
+
     public void createCustomFields(CustomerRecord customerRecord, Map<String, String> customFieldsMap) {
         customFieldsMap.forEach((key, value) -> {
-            Optional<CustomField> customField = customFieldRepository.findByAccountIdAndFieldName(customerRecord.getAccountId(), key);
-            if (customField.isEmpty()) {
-                throw new NoSuchElementException("There is no custom field called " + key);
-            }
-            CustomerCustomFieldValue customFieldValue = new CustomerCustomFieldValue(customerRecord.getAccountId(), value, customField.get(), customerRecord);
+            CustomField customField = fetchCustomFieldByAccountIdAndFieldName(customerRecord.getAccountId(), key);
+            CustomerCustomFieldValue customFieldValue = new CustomerCustomFieldValue(customerRecord.getAccountId(), value, customField, customerRecord);
             customerCustomFieldValueRepository.save(customFieldValue);
         });
     }

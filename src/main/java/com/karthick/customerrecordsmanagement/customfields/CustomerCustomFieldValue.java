@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-@Entity(name = "customer_custom_field_values")
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
+@Entity(name = "customer_custom_field_values")
 public class CustomerCustomFieldValue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,11 +20,11 @@ public class CustomerCustomFieldValue {
     @NonNull
     private String customFieldValue;
     @NonNull
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "custom_field_id", referencedColumnName = "id")
     private CustomField customField;
     @NonNull
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "customer_record_id", referencedColumnName = "id")
     private CustomerRecord customerRecord;
 }
