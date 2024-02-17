@@ -8,6 +8,7 @@ import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordServ
 import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetail;
 import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetailService;
 import com.karthick.customerrecordsmanagement.fileuploadstatus.FileUploadStatusService;
+import com.karthick.customerrecordsmanagement.utils.Constants;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
@@ -66,8 +67,8 @@ public class FileUploadProcess {
     }
 
     private synchronized void createAllCustomerRecordsAndFileUploadStatus(long accountId, List<String[]> csvRecords, long fileUploadStatusId) {
-        int capacity = 10;
         String[] headers = csvRecords.remove(0);
+        int capacity = Math.min(csvRecords.size(), Constants.BATCH_SIZE);
         List<CustomerRecordDto> customerRecordDto = new ArrayList<>(capacity);
         for (int i = 1; i <= csvRecords.size(); i++) {
             customerRecordDto.add(mapDefaultAndCustomFields(accountId, headers, csvRecords.get(i-1)));

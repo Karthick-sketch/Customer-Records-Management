@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId", "email"})})
 public class CustomerRecord {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
     private long accountId;
     @Column(nullable = false)

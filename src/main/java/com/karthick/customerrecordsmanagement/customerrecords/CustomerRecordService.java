@@ -3,11 +3,13 @@ package com.karthick.customerrecordsmanagement.customerrecords;
 import com.karthick.customerrecordsmanagement.customfields.CustomField;
 import com.karthick.customerrecordsmanagement.customfields.CustomFieldService;
 import com.karthick.customerrecordsmanagement.customfields.CustomerCustomFieldValue;
+import com.karthick.customerrecordsmanagement.utils.Constants;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -18,7 +20,7 @@ public class CustomerRecordService {
     private CustomFieldService customFieldService;
 
     public List<CustomerRecordDto> fetchCustomerRecords(long accountId, int pageNumber, int pageSize) {
-        Page<CustomerRecord> customerRecords = customerRecordRepository.findByAccountId(accountId, PageRequest.of(pageNumber, pageSize).withSort(Sort.by("email")));
+        Page<CustomerRecord> customerRecords = customerRecordRepository.findByAccountId(accountId, PageRequest.of(pageNumber, pageSize).withSort(Sort.by(Constants.ORDER_BY_EMAIL)));
         return customerRecords.stream()
                 .map(cr -> new CustomerRecordDto(cr, customFieldService.mapCustomFields(cr.getAccountId(), cr.getId())))
                 .toList();
@@ -37,6 +39,7 @@ public class CustomerRecordService {
         return customerRecordDto;
     }
 
+    @Transactional
     public void createAllCustomerRecord(List<CustomerRecordDto> customerRecordDtos) {
         List<CustomerRecord> customerRecords = customerRecordDtos.stream()
                 .map(this::mapCustomerRecord)
