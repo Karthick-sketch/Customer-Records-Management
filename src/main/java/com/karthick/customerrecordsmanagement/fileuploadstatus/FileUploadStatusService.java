@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -38,15 +39,23 @@ public class FileUploadStatusService {
     }
 
     public FileUploadStatus createNewFileUploadStatus(long accountId, String fileName) {
-        return fileUploadStatusRepository.save(new FileUploadStatus(accountId, fileName));
+        FileUploadStatus fileUploadStatus = new FileUploadStatus(accountId, fileName);
+        fileUploadStatus.setUploadStart(LocalDateTime.now());
+        return fileUploadStatusRepository.save(fileUploadStatus);
     }
 
-    public void updateFileUploadStatus(long accountId, long fileUploadStatusId, int total, int uploaded, int duplicate, int invalid) {
+    public void updateFileUploadStatus(long accountId, long fileUploadStatusId, int total, int uploaded, int duplicate) {
         FileUploadStatus fileUploadStatus = fetchFileUploadStatusByIdAndAccountId(accountId, fileUploadStatusId);
         fileUploadStatus.setTotalRecords(total);
         fileUploadStatus.setUploadedRecords(uploaded);
         fileUploadStatus.setDuplicateRecords(duplicate);
-        fileUploadStatus.setInvalidRecords(invalid);
+        fileUploadStatus.setUploadEnd(LocalDateTime.now());
+        fileUploadStatusRepository.save(fileUploadStatus);
+    }
+
+    public void updateFileUploadStatusInvalidRecord(long accountId, long fileUploadStatusId, int invalidRecord) {
+        FileUploadStatus fileUploadStatus = fetchFileUploadStatusByIdAndAccountId(fileUploadStatusId, accountId);
+        fileUploadStatus.setInvalidRecords(fileUploadStatus.getInvalidRecords() + invalidRecord);
         fileUploadStatusRepository.save(fileUploadStatus);
     }
 

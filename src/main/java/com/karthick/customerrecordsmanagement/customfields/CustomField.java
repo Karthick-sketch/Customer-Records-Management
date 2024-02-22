@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @Entity(name = "custom_fields")
 public class CustomField {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private long id;
     @NonNull
     private Long accountId;

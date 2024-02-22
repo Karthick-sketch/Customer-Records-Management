@@ -9,7 +9,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CustomerRecordDto {
+public class CustomerRecordDTO {
     private CustomerRecord customerRecord;
     private Map<String, String> customFields;
 }

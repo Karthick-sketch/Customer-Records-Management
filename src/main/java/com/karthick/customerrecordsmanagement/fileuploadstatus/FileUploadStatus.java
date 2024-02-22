@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
@@ -25,4 +27,6 @@ public class FileUploadStatus {
     private int uploadedRecords;
     private int duplicateRecords;
     private int invalidRecords;
+    private LocalDateTime uploadStart;
+    private LocalDateTime uploadEnd;
 }

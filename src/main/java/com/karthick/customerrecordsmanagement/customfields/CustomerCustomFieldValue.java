@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.id.IncrementGenerator;
 
 @Data
 @NoArgsConstructor
@@ -13,7 +15,8 @@ import lombok.RequiredArgsConstructor;
 @Entity(name = "customer_custom_field_values")
 public class CustomerCustomFieldValue {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(generator = "sequence")
+    @GenericGenerator(name = "sequence", type = IncrementGenerator.class)
     private long id;
     @NonNull
     private Long accountId;
