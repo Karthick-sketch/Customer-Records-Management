@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 @NoArgsConstructor
 @RequiredArgsConstructor
 @Entity(name = "custom_fields")
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId", "fieldName"})})
 public class CustomField {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

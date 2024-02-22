@@ -47,11 +47,21 @@ public class CustomerRecordService {
 
     private CustomerRecord mapCustomerRecord(CustomerRecordDTO customerRecordDTO) {
         CustomerRecord customerRecord = customerRecordDTO.getCustomerRecord();
+        List<CustomField> customFields = customFieldService.fetchCustomFieldsByAccountId(customerRecord.getAccountId());
         customerRecord.setCustomerCustomFieldValues(customerRecordDTO.getCustomFields().entrySet().stream()
                 .map(entry -> {
-                    CustomField customField = customFieldService.fetchCustomFieldByAccountIdAndFieldName(customerRecord.getAccountId(), entry.getKey());
+                    CustomField customField = findCustomFieldByName(entry.getKey(), customFields);
                     return new CustomerCustomFieldValue(customerRecord.getAccountId(), entry.getValue(), customField, customerRecord);
                 }).toList());
         return customerRecord;
+    }
+
+    private CustomField findCustomFieldByName(String fieldName, List<CustomField> customFields) {
+        for (CustomField customField : customFields) {
+            if (fieldName.equals(customField.getFieldName())) {
+                return customField;
+            }
+        }
+        throw new NoSuchElementException("There is no custom field called " + fieldName);
     }
 }

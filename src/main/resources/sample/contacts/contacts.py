@@ -1,31 +1,40 @@
-import csv
-from faker import Faker
-
-# Create a Faker instance
-fake = Faker()
+import csv, random, string
 
 # Number of contacts to generate
-num_contacts = 5000
+num_contacts = 2000
+
+default_fields = ['firstName', 'lastName', 'email', 'companyName', 'address', 'city', 'country', 'state', 'zipcode', 'phoneNumber']
+custom_fields = [('cf'+str(i)) for i in range(1, 11)]
 
 # Generate random contacts
 contacts = []
 for i in range(num_contacts):
-    first_name = fake.first_name()
-    last_name = fake.last_name()
-    email = "{}.{}@email.com".format(first_name, last_name).lower()
-    personal_email = email
-    age = fake.random_int(21, 30)
-    contacts.append({'firstName': first_name, 'lastName': last_name, 'email': email, 'personalEmail': personal_email, 'age': age})
+    default_field_dict = {
+        'firstName': 'James',
+        'lastName': 'Butt',
+        'email': f'jbutt{i}@email.com',
+        'companyName': 'Benton, John B Jr',
+        'address': '6649 N Blue Gum St',
+        'city': 'New Orleans',
+        'country': 'Orleans',
+        'state': 'LA',
+        'zipcode': '70116',
+        'phoneNumber': '504-845-1427'
+    }
+
+    custom_field_dict = {}
+    for cf in custom_fields:
+        custom_field_dict[cf] = cf+"_value"
+
+    contacts.append({**default_field_dict, **custom_field_dict})
 
 # Save contacts to a CSV file
 csv_file_path = 'src/main/resources/sample/contacts/random_contacts.csv'
-fields = ['firstName', 'lastName', 'email', 'personalEmail', 'age']
+fields = default_fields + custom_fields
 
 with open(csv_file_path, 'w', newline='') as csvfile:
     writer = csv.DictWriter(csvfile, fieldnames=fields)
-    # Write the header
     writer.writeheader()
-    # Write the contacts
     writer.writerows(contacts)
 
 print(f'Random contacts saved to {csv_file_path}')
