@@ -49,7 +49,7 @@ public class FileUploadProcess {
                 .map(record -> mapCustomerRecordAndCustomFields(accountId, headers, record, fileUploadStatusId))
                 .flatMap(Optional::stream)
                 .toList();
-        customerRecordService.createAllCustomerRecord(customerRecordDTOs);
+        customerRecordService.createAllCustomerRecord(accountId, customerRecordDTOs);
         fileUploadStatusService.updateFileUploadStatus(accountId, fileUploadStatusId, csvRecords.size(), 0, 0);
     }
 

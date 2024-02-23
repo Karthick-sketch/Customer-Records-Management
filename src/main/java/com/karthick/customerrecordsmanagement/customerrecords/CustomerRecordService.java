@@ -34,20 +34,21 @@ public class CustomerRecordService {
     }
 
     public CustomerRecordDTO createCustomerRecord(CustomerRecordDTO customerRecordDTO) {
-        customerRecordDTO.setCustomerRecord(customerRecordRepository.save(mapCustomerRecord(customerRecordDTO)));
+        List<CustomField> customFields = customFieldService.fetchCustomFieldsByAccountId(customerRecordDTO.getCustomerRecord().getAccountId());
+        customerRecordDTO.setCustomerRecord(customerRecordRepository.save(mapCustomerRecord(customerRecordDTO, customFields)));
         return customerRecordDTO;
     }
 
-    public void createAllCustomerRecord(List<CustomerRecordDTO> customerRecordDTOs) {
+    public void createAllCustomerRecord(long accountId, List<CustomerRecordDTO> customerRecordDTOs) {
+        List<CustomField> customFields = customFieldService.fetchCustomFieldsByAccountId(accountId);
         List<CustomerRecord> customerRecords = customerRecordDTOs.stream()
-                .map(this::mapCustomerRecord)
+                .map(customerRecordDTO -> mapCustomerRecord(customerRecordDTO, customFields))
                 .toList();
         customerRecordRepository.saveAll(customerRecords);
     }
 
-    private CustomerRecord mapCustomerRecord(CustomerRecordDTO customerRecordDTO) {
+    private CustomerRecord mapCustomerRecord(CustomerRecordDTO customerRecordDTO, List<CustomField> customFields) {
         CustomerRecord customerRecord = customerRecordDTO.getCustomerRecord();
-        List<CustomField> customFields = customFieldService.fetchCustomFieldsByAccountId(customerRecord.getAccountId());
         customerRecord.setCustomerCustomFieldValues(customerRecordDTO.getCustomFields().entrySet().stream()
                 .map(entry -> {
                     CustomField customField = findCustomFieldByName(entry.getKey(), customFields);
