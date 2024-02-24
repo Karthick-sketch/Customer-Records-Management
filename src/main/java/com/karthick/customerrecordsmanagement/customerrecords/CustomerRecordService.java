@@ -3,8 +3,10 @@ package com.karthick.customerrecordsmanagement.customerrecords;
 import com.karthick.customerrecordsmanagement.customfields.CustomField;
 import com.karthick.customerrecordsmanagement.customfields.CustomFieldService;
 import com.karthick.customerrecordsmanagement.customfields.CustomerCustomFieldValue;
+import com.karthick.customerrecordsmanagement.exception.BadRequestException;
 import com.karthick.customerrecordsmanagement.utils.Constants;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -35,16 +37,42 @@ public class CustomerRecordService {
 
     public CustomerRecordDTO createCustomerRecord(CustomerRecordDTO customerRecordDTO) {
         List<CustomField> customFields = customFieldService.fetchCustomFieldsByAccountId(customerRecordDTO.getCustomerRecord().getAccountId());
-        customerRecordDTO.setCustomerRecord(customerRecordRepository.save(mapCustomerRecord(customerRecordDTO, customFields)));
+        customerRecordDTO.setCustomerRecord(createCustomerRecord(mapCustomerRecord(customerRecordDTO, customFields)));
         return customerRecordDTO;
     }
 
-    public void createAllCustomerRecord(long accountId, List<CustomerRecordDTO> customerRecordDTOs) {
+    public int createAllCustomerRecord(long accountId, List<CustomerRecordDTO> customerRecordDTOs) {
         List<CustomField> customFields = customFieldService.fetchCustomFieldsByAccountId(accountId);
         List<CustomerRecord> customerRecords = customerRecordDTOs.stream()
                 .map(customerRecordDTO -> mapCustomerRecord(customerRecordDTO, customFields))
                 .toList();
-        customerRecordRepository.saveAll(customerRecords);
+        int uploadedRecords = customerRecords.size();
+        try {
+            customerRecordRepository.saveAll(customerRecords);
+        } catch (DataIntegrityViolationException e) {
+            uploadedRecords -= createCustomerRecords(customerRecords);
+        }
+        return uploadedRecords;
+    }
+
+    private int createCustomerRecords(List<CustomerRecord> customerRecords) {
+        int duplicateRecords = 0;
+        for (CustomerRecord customerRecord : customerRecords) {
+            try {
+                createCustomerRecord(customerRecord);
+            } catch (BadRequestException e) {
+                duplicateRecords++;
+            }
+        }
+        return duplicateRecords;
+    }
+
+    private CustomerRecord createCustomerRecord(CustomerRecord customerRecord) {
+        try {
+            return customerRecordRepository.save(customerRecord);
+        } catch (DataIntegrityViolationException e) {
+            throw new BadRequestException("A contact with the this " + customerRecord.getEmail() + " email is already present");
+        }
     }
 
     private CustomerRecord mapCustomerRecord(CustomerRecordDTO customerRecordDTO, List<CustomField> customFields) {

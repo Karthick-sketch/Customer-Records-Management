@@ -44,18 +44,13 @@ public class FileUploadStatusService {
         return fileUploadStatusRepository.save(fileUploadStatus);
     }
 
-    public void updateFileUploadStatus(long accountId, long fileUploadStatusId, int total, int uploaded, int duplicate) {
+    public void updateFileUploadStatus(long accountId, long fileUploadStatusId, int total, int uploaded, int duplicate, int invalid) {
         FileUploadStatus fileUploadStatus = fetchFileUploadStatusByIdAndAccountId(accountId, fileUploadStatusId);
         fileUploadStatus.setTotalRecords(total);
         fileUploadStatus.setUploadedRecords(uploaded);
         fileUploadStatus.setDuplicateRecords(duplicate);
+        fileUploadStatus.setInvalidRecords(invalid);
         fileUploadStatus.setUploadEnd(LocalDateTime.now());
-        fileUploadStatusRepository.save(fileUploadStatus);
-    }
-
-    public void updateFileUploadStatusInvalidRecord(long accountId, long fileUploadStatusId, int invalidRecord) {
-        FileUploadStatus fileUploadStatus = fetchFileUploadStatusByIdAndAccountId(fileUploadStatusId, accountId);
-        fileUploadStatus.setInvalidRecords(fileUploadStatus.getInvalidRecords() + invalidRecord);
         fileUploadStatusRepository.save(fileUploadStatus);
     }
 

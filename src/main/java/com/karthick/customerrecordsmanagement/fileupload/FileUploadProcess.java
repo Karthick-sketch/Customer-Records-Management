@@ -45,22 +45,31 @@ public class FileUploadProcess {
 
     private synchronized void createAllCustomerRecordsAndFileUploadStatus(long accountId, List<String[]> csvRecords, long fileUploadStatusId) {
         String[] headers = csvRecords.remove(0);
-        List<CustomerRecordDTO> customerRecordDTOs = csvRecords.stream()
-                .map(record -> mapCustomerRecordAndCustomFields(accountId, headers, record, fileUploadStatusId))
-                .flatMap(Optional::stream)
-                .toList();
-        customerRecordService.createAllCustomerRecord(accountId, customerRecordDTOs);
-        fileUploadStatusService.updateFileUploadStatus(accountId, fileUploadStatusId, csvRecords.size(), 0, 0);
+        List<CustomerRecordDTO> customerRecordDTOs = new ArrayList<>();
+        int counter = 0, uploadedRecords = 0, invalidRecords = 0;
+        for (String[] record : csvRecords) {
+            Optional<CustomerRecordDTO> customerRecordDTO = mapCustomerRecordAndCustomFields(accountId, headers, record);
+            if (customerRecordDTO.isEmpty()) {
+                invalidRecords++;
+            } else {
+                customerRecordDTOs.add(customerRecordDTO.get());
+                if ((counter + 1) % Constants.BATCH_SIZE == 0 || (counter + 1) == csvRecords.size()) {
+                    uploadedRecords += customerRecordService.createAllCustomerRecord(accountId, customerRecordDTOs);
+                    customerRecordDTOs.clear();
+                }
+            }
+            counter++;
+        }
+        fileUploadStatusService.updateFileUploadStatus(accountId, fileUploadStatusId, csvRecords.size(), uploadedRecords, csvRecords.size()-uploadedRecords, invalidRecords);
     }
 
-    private Optional<CustomerRecordDTO> mapCustomerRecordAndCustomFields(long accountId, String[] headers, String[] records, long fileUploadStatusId) {
+    private Optional<CustomerRecordDTO> mapCustomerRecordAndCustomFields(long accountId, String[] headers, String[] records) {
         List<String> fieldNames = CustomerRecord.getFields();
         Map<String, String> customerRecords = new LinkedHashMap<>();
         Map<String, String> customFields = new LinkedHashMap<>();
-        for (int i = 0; i < headers.length && i < records.length; i++) {
-            String key = headers[i], value = records[i];
+        for (int i = 0; i < headers.length; i++) {
+            String key = headers[i], value = i < records.length ? records[i] : null;
             if (key.equals(Constants.EMAIL_FIELD) && (value == null || value.isBlank())) {
-                fileUploadStatusService.updateFileUploadStatusInvalidRecord(accountId, fileUploadStatusId, 1);
                 return Optional.empty();
             } else if (fieldNames.contains(key)) {
                 customerRecords.put(key, value);
