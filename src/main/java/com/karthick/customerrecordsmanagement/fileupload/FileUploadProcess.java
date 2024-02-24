@@ -53,14 +53,15 @@ public class FileUploadProcess {
                 invalidRecords++;
             } else {
                 customerRecordDTOs.add(customerRecordDTO.get());
-                if ((counter + 1) % Constants.BATCH_SIZE == 0 || (counter + 1) == csvRecords.size()) {
-                    uploadedRecords += customerRecordService.createAllCustomerRecord(accountId, customerRecordDTOs);
-                    customerRecordDTOs.clear();
-                }
+            }
+            if ((counter + 1) % Constants.BATCH_SIZE == 0 || (counter + 1) == csvRecords.size()) {
+                uploadedRecords += customerRecordService.createAllCustomerRecord(accountId, customerRecordDTOs);
+                customerRecordDTOs.clear();
             }
             counter++;
         }
-        fileUploadStatusService.updateFileUploadStatus(accountId, fileUploadStatusId, csvRecords.size(), uploadedRecords, csvRecords.size()-uploadedRecords, invalidRecords);
+        int duplicateRecords = (csvRecords.size() - uploadedRecords) - invalidRecords;
+        fileUploadStatusService.updateFileUploadStatus(accountId, fileUploadStatusId, csvRecords.size(), uploadedRecords, duplicateRecords, invalidRecords);
     }
 
     private Optional<CustomerRecordDTO> mapCustomerRecordAndCustomFields(long accountId, String[] headers, String[] records) {
