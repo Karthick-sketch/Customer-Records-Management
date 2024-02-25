@@ -1,5 +1,7 @@
 package com.karthick.customerrecordsmanagement.customerrecords;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.karthick.customerrecordsmanagement.customfields.CustomField;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -26,6 +28,9 @@ public class CustomerRecord {
     private String state;
     private String country;
     private Integer zipcode;
+    @JsonIgnore
+    @OneToOne(mappedBy = "customerRecord", cascade = CascadeType.ALL)
+    private CustomField customField;
 
     public static List<String> getFields() {
         return Stream.of(CustomerRecord.class.getDeclaredFields())

@@ -3,7 +3,7 @@ package com.karthick.customerrecordsmanagement.fileupload;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecord;
-import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordDto;
+import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordDTO;
 import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordService;
 import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetail;
 import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetailService;
@@ -50,9 +50,9 @@ public class FileUploadProcess {
         int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
         for (String[] record : csvRecords) {
             try {
-                CustomerRecordDto customerRecordDto = mapDefaultAndCustomFields(headers, record);
-                customerRecordDto.getDefaultFields().setAccountId(accountId);
-                customerRecordService.createNewCustomerRecord(customerRecordDto);
+                CustomerRecordDTO customerRecordDTO = mapDefaultAndCustomFields(headers, record);
+                customerRecordDTO.getDefaultFields().setAccountId(accountId);
+                customerRecordService.createNewCustomerRecord(customerRecordDTO);
                 uploadedRecords++;
             } catch (DataIntegrityViolationException e) {
                 if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
@@ -66,7 +66,7 @@ public class FileUploadProcess {
         fileUploadStatusService.updateFileUploadStatus(accountId, fileUploadStatusId, csvRecords.size(), uploadedRecords, duplicateRecords, invalidRecords);
     }
 
-    private CustomerRecordDto mapDefaultAndCustomFields(String[] headers, String[] records) {
+    private CustomerRecordDTO mapDefaultAndCustomFields(String[] headers, String[] records) {
         List<String> fieldNames = CustomerRecord.getFields();
         Map<String, String> defaultFields = new LinkedHashMap<>();
         Map<String, String> customFields = new LinkedHashMap<>();
@@ -78,7 +78,7 @@ public class FileUploadProcess {
                 customFields.put(key, value);
             }
         }
-        return new CustomerRecordDto(mapToCustomerRecord(defaultFields), customFields);
+        return new CustomerRecordDTO(mapToCustomerRecord(defaultFields), customFields);
     }
 
     private CustomerRecord mapToCustomerRecord(Map<String, String> defaultFields) {

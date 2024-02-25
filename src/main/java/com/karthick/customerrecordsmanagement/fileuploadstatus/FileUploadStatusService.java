@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -38,7 +39,9 @@ public class FileUploadStatusService {
     }
 
     public FileUploadStatus createNewFileUploadStatus(long accountId, String fileName) {
-        return fileUploadStatusRepository.save(new FileUploadStatus(accountId, fileName));
+        FileUploadStatus fileUploadStatus = new FileUploadStatus(accountId, fileName);
+        fileUploadStatus.setUploadStart(LocalDateTime.now());
+        return fileUploadStatusRepository.save(fileUploadStatus);
     }
 
     public void updateFileUploadStatus(long accountId, long fileUploadStatusId, int total, int uploaded, int duplicate, int invalid) {
@@ -47,10 +50,11 @@ public class FileUploadStatusService {
         fileUploadStatus.setUploadedRecords(uploaded);
         fileUploadStatus.setDuplicateRecords(duplicate);
         fileUploadStatus.setInvalidRecords(invalid);
+        fileUploadStatus.setUploadEnd(LocalDateTime.now());
         fileUploadStatusRepository.save(fileUploadStatus);
     }
 
-    public FileUploadStatusDto uploadCsvFile(long accountId, MultipartFile file) {
+    public FileUploadStatusDTO uploadCsvFile(long accountId, MultipartFile file) {
         if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
             throw new BadRequestException("Only CSV files are allowed");
         }
@@ -61,7 +65,7 @@ public class FileUploadStatusService {
             FileUploadStatus fileUploadStatus = createNewFileUploadStatus(accountId, csvFileDetail.getFileName());
             kafkaProducer.publishKafkaMessage(accountId, csvFileDetail.getId(), fileUploadStatus.getId());
             logger.info(file.getOriginalFilename() + " file upload");
-            return new FileUploadStatusDto(fileUploadStatus.getId());
+            return new FileUploadStatusDTO(fileUploadStatus.getId());
         } catch (IOException e) {
             logger.severe(e.getMessage());
         }

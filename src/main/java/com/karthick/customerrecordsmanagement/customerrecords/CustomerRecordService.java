@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 @Service
 @AllArgsConstructor
@@ -16,25 +15,23 @@ public class CustomerRecordService {
     private CustomFieldService customFieldService;
 
     @Transactional
-    public CustomerRecordDto createNewCustomerRecord(CustomerRecordDto customerRecordDto) {
-        CustomerRecord customerRecord = customerRecordRepository.save(customerRecordDto.getDefaultFields());
-        customFieldService.createCustomFields(customerRecord, customerRecordDto.getCustomFields());
-        return customerRecordDto;
+    public CustomerRecordDTO createNewCustomerRecord(CustomerRecordDTO customerRecordDTO) {
+        CustomerRecord customerRecord = customerRecordRepository.save(customerRecordDTO.getDefaultFields());
+        customFieldService.createCustomFields(customerRecord, customerRecordDTO.getCustomFields());
+        return customerRecordDTO;
     }
 
-    public List<CustomerRecordDto> fetchCustomerRecords(long accountId, int pageNumber, int pageSize) {
-        List<CustomerRecord> defaultFields = customerRecordRepository.findAll(PageRequest.of(pageNumber, pageSize)).stream().toList();
-        List<Map<String, String>> customFields = customFieldService.mapCustomFieldsByPagination(accountId, pageNumber, pageSize);
-        return IntStream.range(0, defaultFields.size())
-                .mapToObj(i -> new CustomerRecordDto(defaultFields.get(i), customFields.get(i)))
+    public List<CustomerRecordDTO> fetchCustomerRecords(long accountId, int pageNumber, int pageSize) {
+        return customerRecordRepository.findAll(PageRequest.of(pageNumber, pageSize)).stream()
+                .map(customerRecord -> new CustomerRecordDTO(customerRecord, customFieldService.mapCustomFields(accountId, customerRecord.getId())))
                 .toList();
     }
 
-    public CustomerRecordDto fetchCustomerRecordByIdAndAccountId(long id, long accountId) {
+    public CustomerRecordDTO fetchCustomerRecordByIdAndAccountId(long id, long accountId) {
         Optional<CustomerRecord> customerRecord = customerRecordRepository.findByIdAndAccountId(id, accountId);
         if (customerRecord.isEmpty()) {
             throw new NoSuchElementException("There is no record with the Id of " + id);
         }
-        return new CustomerRecordDto(customerRecord.get(), customFieldService.mapCustomFields(accountId, id));
+        return new CustomerRecordDTO(customerRecord.get(), customFieldService.mapCustomFields(accountId, id));
     }
 }

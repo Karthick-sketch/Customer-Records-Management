@@ -23,7 +23,7 @@ public class FileUploadStatusController {
     }
 
     @PostMapping("/{accountId}/upload-csv")
-    public ResponseEntity<FileUploadStatusDto> uploadCsvFile(@PathVariable long accountId, @RequestPart("file") MultipartFile file) {
+    public ResponseEntity<FileUploadStatusDTO> uploadCsvFile(@PathVariable long accountId, @RequestPart("file") MultipartFile file) {
         return new ResponseEntity<>(fileUploadStatusService.uploadCsvFile(accountId, file), HttpStatus.OK);
     }
 }

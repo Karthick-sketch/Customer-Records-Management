@@ -1,5 +1,6 @@
 package com.karthick.customerrecordsmanagement.customfields;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecord;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,7 +22,12 @@ public class CustomField {
     private String field3;
     private String field4;
     private String field5;
-
+    private String field6;
+    private String field7;
+    private String field8;
+    private String field9;
+    private String field10;
+    @JsonIgnore
     @OneToOne
     @JoinColumn(name = "customer_record_id", referencedColumnName = "id")
     private CustomerRecord customerRecord;
