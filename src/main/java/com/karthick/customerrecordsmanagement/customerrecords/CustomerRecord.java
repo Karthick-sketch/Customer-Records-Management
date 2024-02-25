@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.karthick.customerrecordsmanagement.customfields.CustomField;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.id.IncrementGenerator;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -14,7 +16,8 @@ import java.util.stream.Stream;
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId", "email"})})
 public class CustomerRecord {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "sequence")
+    @GenericGenerator(name = "sequence", type = IncrementGenerator.class)
     private long id;
     private long accountId;
     @Column(nullable = false)

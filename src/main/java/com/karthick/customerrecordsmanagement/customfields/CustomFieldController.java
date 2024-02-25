@@ -20,8 +20,8 @@ public class CustomFieldController {
     }
 
     @PostMapping
-    public ResponseEntity<CustomFieldMapping> createCustomField(@RequestBody CustomFieldMapping customFieldMapping) {
-        return new ResponseEntity<>(customFieldMappingService.createCustomFieldMapping(customFieldMapping), HttpStatus.CREATED);
+    public ResponseEntity<CustomFieldMapping> createCustomField(@RequestBody CustomFieldMappingDTO customFieldMappingDTO) {
+        return new ResponseEntity<>(customFieldMappingService.createCustomFieldMapping(customFieldMappingDTO), HttpStatus.CREATED);
     }
 
     // Testing
@@ -29,7 +29,7 @@ public class CustomFieldController {
     public ResponseEntity<List<CustomFieldMapping>> createCustomFields() {
         List<CustomFieldMapping> customFields = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
-            customFields.add(customFieldMappingService.createCustomFieldMapping(new CustomFieldMapping(1L, "cf"+i, "field"+i, "text")));
+            customFields.add(customFieldMappingService.createCustomFieldMapping(new CustomFieldMappingDTO(1L, "cf"+i, "text")));
         }
         return new ResponseEntity<>(customFields, HttpStatus.CREATED);
     }

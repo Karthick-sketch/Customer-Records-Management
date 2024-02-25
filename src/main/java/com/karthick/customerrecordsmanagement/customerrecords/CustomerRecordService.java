@@ -80,9 +80,12 @@ public class CustomerRecordService {
         CustomerRecord customerRecord = customerRecordDTO.getCustomerRecord();
         CustomField customField = new CustomField(customerRecord);
         customerRecordDTO.getCustomFields().forEach((key, value) -> {
-            assert customField.setField(findFieldNameByColumnName(key, customFieldMappingList), value);
+            boolean isFieldSet = customField.setField(findFieldNameByColumnName(key, customFieldMappingList), value);
+            if (!isFieldSet) {
+                throw new NoSuchElementException("There is no custom field called " + key);
+            }
         });
-        customerRecord.setCustomField(customFieldService.createCustomField(customField));
+        customerRecord.setCustomField(customField);
         return customerRecord;
     }
 

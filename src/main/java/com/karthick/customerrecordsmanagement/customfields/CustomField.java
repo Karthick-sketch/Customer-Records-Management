@@ -5,16 +5,23 @@ import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecord;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.id.IncrementGenerator;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Entity(name = "custom_fields")
 @Data
 @NoArgsConstructor
 public class CustomField {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(generator = "sequence")
+    @GenericGenerator(name = "sequence", type = IncrementGenerator.class)
     private long id;
     private long accountId;
     private String field1;
@@ -35,6 +42,13 @@ public class CustomField {
     public CustomField(CustomerRecord customerRecord) {
         this.accountId = customerRecord.getAccountId();
         this.customerRecord = customerRecord;
+    }
+
+    public static List<String> getFieldNames() {
+        return Stream.of(CustomField.class.getDeclaredFields())
+                .filter(field -> !(field.getName().equals("id") || field.getName().equals("accountId")))
+                .map(Field::getName)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public boolean setField(String fieldName, String value) {
