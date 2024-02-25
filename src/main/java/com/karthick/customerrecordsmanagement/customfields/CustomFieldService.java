@@ -13,12 +13,17 @@ public class CustomFieldService {
     private CustomFieldRepository customFieldRepository;
     private CustomFieldMappingService customFieldMappingService;
 
-    public void createCustomFields(CustomerRecord customerRecord, Map<String, String> customFieldsMap) {
-        CustomField customField = customFieldRepository.save(new CustomField(customerRecord));
+    public CustomField createCustomField(CustomField customField) {
+        return customFieldRepository.save(customField);
+    }
+
+    public CustomField createCustomField(CustomerRecord customerRecord, Map<String, String> customFieldsMap) {
+        List<CustomFieldMapping> customFieldMappingList = customFieldMappingService.fetchCustomFieldMappingAccountId(customerRecord.getAccountId());
+        CustomField customField = new CustomField(customerRecord);
         customFieldsMap.forEach((key, value) -> {
-            CustomFieldMapping customFieldMapping = new CustomFieldMapping(customerRecord.getAccountId(), key, customField.setField(value), "text");
-            customFieldMappingService.createCustomFieldMapping(customFieldMapping);
+            assert customField.setField(findFieldNameByColumnName(key, customFieldMappingList), value);
         });
+        return createCustomField(customField);
     }
 
     public Map<String, String> mapCustomFields(long accountId, long customerRecordId) {
@@ -28,6 +33,15 @@ public class CustomFieldService {
             return null;
         }
         return convertCustomFieldsToMap(customFieldOptional.get(), customFieldMappingList);
+    }
+
+    private String findFieldNameByColumnName(String columnName, List<CustomFieldMapping> customFieldMappingList) {
+        for (CustomFieldMapping customFieldMapping : customFieldMappingList) {
+            if (columnName.equals(customFieldMapping.getColumnName())) {
+                return customFieldMapping.getFieldName();
+            }
+        }
+        throw new NoSuchElementException("There is no custom field called " + columnName);
     }
 
     private Map<String, String> convertCustomFieldsToMap(CustomField customField, List<CustomFieldMapping> customFieldMapping) {

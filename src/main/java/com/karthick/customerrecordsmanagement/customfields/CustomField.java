@@ -37,22 +37,20 @@ public class CustomField {
         this.customerRecord = customerRecord;
     }
 
-    public String setField(String value) {
-        Field[] fields = this.getClass().getDeclaredFields();
-        for (Field field : fields) {
-            if (!(field.getName().equals("id") || field.getName().equals("customerRecord"))) {
-                try {
-                    field.setAccessible(true);
-                    if (field.get(this) == null) {
-                        field.set(this, value);
-                        return field.getName();
-                    }
-                } catch (IllegalAccessException e) {
-                    e.fillInStackTrace();
+    public boolean setField(String fieldName, String value) {
+        Field field = ReflectionUtils.findField(CustomField.class, fieldName);
+        if (field != null) {
+            try {
+                field.setAccessible(true);
+                if (field.get(this) == null) {
+                    field.set(this, value);
+                    return true;
                 }
+            } catch (IllegalAccessException e) {
+                e.fillInStackTrace();
             }
         }
-        return null;
+        return false;
     }
 
     public String getValueByFieldName(String fieldName) {

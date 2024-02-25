@@ -8,13 +8,11 @@ import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecordServ
 import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetail;
 import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetailService;
 import com.karthick.customerrecordsmanagement.fileuploadstatus.FileUploadStatusService;
+import com.karthick.customerrecordsmanagement.utils.Constants;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 import lombok.AllArgsConstructor;
-import org.hibernate.PropertyValueException;
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -36,7 +34,7 @@ public class FileUploadProcess {
         CsvFileDetail csvFileDetail = csvFileDetailService.fetchCsvFileDetailById(fileId);
         List<String[]> csvRecords = readCsvFile(csvFileDetail.getFilePath());
         if (csvRecords != null) {
-            createCustomerRecordsAndFileUploadStatus(accountId, csvRecords, fileUploadStatusId);
+            createAllCustomerRecordsAndFileUploadStatus(accountId, csvRecords, fileUploadStatusId);
         } else {
             logger.warning(csvFileDetail.getFileName() + " file is empty");
         }
@@ -45,40 +43,44 @@ public class FileUploadProcess {
         }
     }
 
-    private synchronized void createCustomerRecordsAndFileUploadStatus(long accountId, List<String[]> csvRecords, long fileUploadStatusId) {
+    private synchronized void createAllCustomerRecordsAndFileUploadStatus(long accountId, List<String[]> csvRecords, long fileUploadStatusId) {
         String[] headers = csvRecords.remove(0);
-        int uploadedRecords = 0, duplicateRecords = 0, invalidRecords = 0;
+        List<CustomerRecordDTO> customerRecordDTOs = new ArrayList<>();
+        int counter = 0, uploadedRecords = 0, invalidRecords = 0;
         for (String[] record : csvRecords) {
-            try {
-                CustomerRecordDTO customerRecordDTO = mapDefaultAndCustomFields(headers, record);
-                customerRecordDTO.getDefaultFields().setAccountId(accountId);
-                customerRecordService.createNewCustomerRecord(customerRecordDTO);
-                uploadedRecords++;
-            } catch (DataIntegrityViolationException e) {
-                if (e.getCause().getClass().equals(ConstraintViolationException.class)) {
-                    duplicateRecords++;
-                } else if (e.getCause().getClass().equals(PropertyValueException.class)) {
-                    invalidRecords++;
-                }
-                logger.warning("Exception in Customer record creation. Error : " + e.getMessage());
+            Optional<CustomerRecordDTO> customerRecordDTO = mapCustomerRecordAndCustomFields(accountId, headers, record);
+            if (customerRecordDTO.isEmpty()) {
+                invalidRecords++;
+            } else {
+                customerRecordDTOs.add(customerRecordDTO.get());
             }
+            if ((counter + 1) % Constants.BATCH_SIZE == 0 || (counter + 1) == csvRecords.size()) {
+                uploadedRecords += customerRecordService.createAllCustomerRecords(accountId, customerRecordDTOs);
+                customerRecordDTOs.clear();
+            }
+            counter++;
         }
+        int duplicateRecords = (csvRecords.size() - uploadedRecords) - invalidRecords;
         fileUploadStatusService.updateFileUploadStatus(accountId, fileUploadStatusId, csvRecords.size(), uploadedRecords, duplicateRecords, invalidRecords);
     }
 
-    private CustomerRecordDTO mapDefaultAndCustomFields(String[] headers, String[] records) {
+    private Optional<CustomerRecordDTO> mapCustomerRecordAndCustomFields(long accountId, String[] headers, String[] records) {
         List<String> fieldNames = CustomerRecord.getFields();
-        Map<String, String> defaultFields = new LinkedHashMap<>();
+        Map<String, String> customerRecords = new LinkedHashMap<>();
         Map<String, String> customFields = new LinkedHashMap<>();
-        for (int i = 0; i < headers.length && i < records.length; i++) {
-            String key = headers[i], value = records[i];
-            if (fieldNames.contains(key)) {
-                defaultFields.put(key, value);
+        for (int i = 0; i < headers.length; i++) {
+            String key = headers[i], value = i < records.length ? records[i] : null;
+            if (key.equals(Constants.EMAIL_FIELD) && (value == null || value.isBlank())) {
+                return Optional.empty();
+            } else if (fieldNames.contains(key)) {
+                customerRecords.put(key, value);
             } else {
                 customFields.put(key, value);
             }
         }
-        return new CustomerRecordDTO(mapToCustomerRecord(defaultFields), customFields);
+        CustomerRecord customerRecord = mapToCustomerRecord(customerRecords);
+        customerRecord.setAccountId(accountId);
+        return Optional.of(new CustomerRecordDTO(customerRecord, customFields));
     }
 
     private CustomerRecord mapToCustomerRecord(Map<String, String> defaultFields) {
