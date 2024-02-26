@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 @Data
 @NoArgsConstructor
 @Entity(name = "custom_fields")
-@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId, customer_record_id"})})
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId", "customer_record_id"})})
 public class CustomField {
     @Id
     @GeneratedValue(generator = "sequence")
@@ -47,9 +47,10 @@ public class CustomField {
     }
 
     public static List<String> getFieldNames() {
+        List<String> nonFields = List.of("id", "accountId", "customerRecord");
         return Stream.of(CustomField.class.getDeclaredFields())
-                .filter(field -> !(field.getName().equals("id") || field.getName().equals("accountId")))
                 .map(Field::getName)
+                .filter(name -> !(nonFields.contains(name)))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 

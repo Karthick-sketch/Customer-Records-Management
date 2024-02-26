@@ -15,22 +15,32 @@ public class CustomFieldMappingService {
 
     public CustomFieldMapping createCustomFieldMapping(CustomFieldMappingDTO customFieldMappingDTO) {
         List<String> fields = CustomField.getFieldNames();
-        fetchCustomFieldMappingAccountId(customFieldMappingDTO.getAccountId()).forEach(customFieldMapping ->
-            fields.remove(customFieldMapping.getCustomFieldName())
+        fetchCustomFieldMappingByAccountId(customFieldMappingDTO.getAccountId()).forEach(customFieldMapping ->
+            fields.remove(customFieldMapping.getFieldName())
         );
         if (fields.isEmpty()) {
             throw new BadRequestException("Custom field limit exceed");
         }
         CustomFieldMapping customFieldMapping = convertToCustomFieldMapping(customFieldMappingDTO);
-        customFieldMapping.setColumnName(fields.get(0));
+        customFieldMapping.setFieldName(fields.get(0));
         return customFieldMappingRepository.save(customFieldMapping);
     }
 
-    public List<CustomFieldMapping> fetchCustomFieldMappingAccountId(long accountId) {
+    public List<CustomFieldMapping> fetchCustomFieldMappingByAccountId(long accountId) {
         return customFieldMappingRepository.findByAccountId(accountId);
+    }
+
+    public List<CustomFieldMappingDTO> fetchCustomFieldMappingDTOByAccountId(long accountId) {
+        return fetchCustomFieldMappingByAccountId(accountId).stream()
+                .map(this::convertToCustomFieldMappingDTO)
+                .toList();
     }
 
     private CustomFieldMapping convertToCustomFieldMapping(CustomFieldMappingDTO customFieldMappingDTO) {
         return modelMapper.map(customFieldMappingDTO, CustomFieldMapping.class);
+    }
+
+    private CustomFieldMappingDTO convertToCustomFieldMappingDTO(CustomFieldMapping customFieldMapping) {
+        return modelMapper.map(customFieldMapping, CustomFieldMappingDTO.class);
     }
 }

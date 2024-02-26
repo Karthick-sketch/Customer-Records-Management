@@ -1,7 +1,7 @@
 import csv, random, string
 
 # Number of contacts to generate
-num_contacts = 2000
+num_contacts = 1000
 
 default_fields = ['firstName', 'lastName', 'email', 'companyName', 'address', 'city', 'country', 'state', 'zipcode', 'phoneNumber']
 custom_fields = [('cf'+str(i)) for i in range(1, 11)]

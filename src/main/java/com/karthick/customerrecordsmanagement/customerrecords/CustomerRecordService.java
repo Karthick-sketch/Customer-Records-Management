@@ -52,7 +52,7 @@ public class CustomerRecordService {
     }
 
     public int createAllCustomerRecords(long accountId, List<CustomerRecordDTO> customerRecordDTOs) {
-        List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingAccountId(accountId);
+        List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(accountId);
         List<CustomerRecord> customerRecords = customerRecordDTOs.stream()
                 .map(customerRecordDTO -> mapCustomerRecord(customerRecordDTO, customFieldMappings))
                 .toList();

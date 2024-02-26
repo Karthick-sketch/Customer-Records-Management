@@ -23,7 +23,7 @@ public class CustomFieldService {
 
     public CustomField createCustomField(CustomerRecordDTO customerRecordDTO) {
         CustomerRecord customerRecord = customerRecordDTO.getCustomerRecord();
-        List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingAccountId(customerRecord.getAccountId());
+        List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(customerRecord.getAccountId());
         return createCustomField(mapCustomFields(customerRecord, customerRecordDTO.getCustomFields(), customFieldMappings));
     }
 
@@ -34,7 +34,7 @@ public class CustomFieldService {
     }
 
     public Map<String, String> reverseMapCustomFields(long accountId, long customerRecordId) {
-        List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingAccountId(accountId);
+        List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(accountId);
         Optional<CustomField> customFieldOptional = customFieldRepository.findByCustomerRecordId(customerRecordId);
         if (customFieldMappings.isEmpty() || customFieldOptional.isEmpty()) {
             return null;
@@ -45,7 +45,7 @@ public class CustomFieldService {
     private String findColumnNameByCustomFieldName(String columnName, List<CustomFieldMapping> customFieldMappings) {
         for (CustomFieldMapping customFieldMapping : customFieldMappings) {
             if (columnName.equals(customFieldMapping.getCustomFieldName())) {
-                return customFieldMapping.getColumnName();
+                return customFieldMapping.getFieldName();
             }
         }
         throw new EntityNotException("There is no custom field called " + columnName);
@@ -53,6 +53,6 @@ public class CustomFieldService {
 
     private Map<String, String> convertCustomFieldsToMap(CustomField customField, List<CustomFieldMapping> customFieldMapping) {
         return customFieldMapping.stream()
-                .collect(Collectors.toMap(CustomFieldMapping::getColumnName, cfm -> customField.getValueByFieldName(cfm.getColumnName())));
+                .collect(Collectors.toMap(CustomFieldMapping::getFieldName, cfm -> customField.getValueByFieldName(cfm.getFieldName())));
     }
 }

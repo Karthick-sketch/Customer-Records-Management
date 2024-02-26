@@ -15,8 +15,8 @@ public class CustomFieldController {
     private CustomFieldMappingService customFieldMappingService;
 
     @GetMapping("/account/{accountId}")
-    public ResponseEntity<List<CustomFieldMapping>> getCustomFields(@PathVariable long accountId) {
-        return new ResponseEntity<>(customFieldMappingService.fetchCustomFieldMappingAccountId(accountId), HttpStatus.OK);
+    public ResponseEntity<List<CustomFieldMappingDTO>> getCustomFields(@PathVariable long accountId) {
+        return new ResponseEntity<>(customFieldMappingService.fetchCustomFieldMappingDTOByAccountId(accountId), HttpStatus.OK);
     }
 
     @PostMapping
@@ -29,7 +29,7 @@ public class CustomFieldController {
     public ResponseEntity<List<CustomFieldMapping>> createCustomFields() {
         List<CustomFieldMapping> customFields = new ArrayList<>();
         for (int i = 1; i <= 10; i++) {
-            customFields.add(customFieldMappingService.createCustomFieldMapping(new CustomFieldMappingDTO(1L, "cf"+i, "text")));
+            customFields.add(customFieldMappingService.createCustomFieldMapping(new CustomFieldMappingDTO(0, 1, "cf"+i, "text")));
         }
         return new ResponseEntity<>(customFields, HttpStatus.CREATED);
     }

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomFieldMappingDTO {
+    private long id;
     private long accountId;
     private String customFieldName;
     private String dataType;
