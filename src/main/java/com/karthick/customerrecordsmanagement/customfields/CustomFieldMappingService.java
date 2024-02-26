@@ -3,6 +3,7 @@ package com.karthick.customerrecordsmanagement.customfields;
 import com.karthick.customerrecordsmanagement.exception.BadRequestException;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,7 +14,7 @@ public class CustomFieldMappingService {
     private CustomFieldMappingRepository customFieldMappingRepository;
     private ModelMapper modelMapper;
 
-    public CustomFieldMapping createCustomFieldMapping(CustomFieldMappingDTO customFieldMappingDTO) {
+    public CustomFieldMappingDTO createCustomFieldMapping(CustomFieldMappingDTO customFieldMappingDTO) {
         List<String> fields = CustomField.getFieldNames();
         fetchCustomFieldMappingByAccountId(customFieldMappingDTO.getAccountId()).forEach(customFieldMapping ->
             fields.remove(customFieldMapping.getFieldName())
@@ -23,7 +24,11 @@ public class CustomFieldMappingService {
         }
         CustomFieldMapping customFieldMapping = convertToCustomFieldMapping(customFieldMappingDTO);
         customFieldMapping.setFieldName(fields.get(0));
-        return customFieldMappingRepository.save(customFieldMapping);
+        try {
+            return convertToCustomFieldMappingDTO(customFieldMappingRepository.save(customFieldMapping));
+        } catch (DataIntegrityViolationException e) {
+            throw new BadRequestException("The custom field " + customFieldMapping.getCustomFieldName() + " is already present");
+        }
     }
 
     public List<CustomFieldMapping> fetchCustomFieldMappingByAccountId(long accountId) {

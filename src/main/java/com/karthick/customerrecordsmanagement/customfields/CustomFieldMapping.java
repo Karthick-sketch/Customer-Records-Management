@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Entity(name = "custom_fields_mapping")
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId", "customFieldName"})})
 public class CustomFieldMapping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
