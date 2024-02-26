@@ -6,10 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
-@Entity(name = "custom_fields_mapping")
 @Data
 @NoArgsConstructor
 @RequiredArgsConstructor
+@Entity(name = "custom_fields_mapping")
 public class CustomFieldMapping {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +19,7 @@ public class CustomFieldMapping {
     @NonNull
     private String columnName;
     @NonNull
-    private String fieldName;
+    private String customFieldName;
     @NonNull
     private String dataType;
 }

@@ -2,6 +2,7 @@ package com.karthick.customerrecordsmanagement.customfields;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.karthick.customerrecordsmanagement.customerrecords.CustomerRecord;
+import com.karthick.customerrecordsmanagement.exception.EntityNotException;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,9 +16,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Entity(name = "custom_fields")
 @Data
 @NoArgsConstructor
+@Entity(name = "custom_fields")
+@Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId, customer_record_id"})})
 public class CustomField {
     @Id
     @GeneratedValue(generator = "sequence")
@@ -51,32 +53,33 @@ public class CustomField {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public boolean setField(String fieldName, String value) {
+    public void setField(String fieldName, String value) {
         Field field = ReflectionUtils.findField(CustomField.class, fieldName);
-        if (field != null) {
-            try {
-                field.setAccessible(true);
-                if (field.get(this) == null) {
-                    field.set(this, value);
-                    return true;
-                }
-            } catch (IllegalAccessException e) {
-                e.fillInStackTrace();
+        throwIfFieldIsNull(field, fieldName);
+        try {
+            field.setAccessible(true);
+            if (field.get(this) == null) {
+                field.set(this, value);
             }
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e.getMessage());
         }
-        return false;
     }
 
     public String getValueByFieldName(String fieldName) {
         Field field = ReflectionUtils.findField(CustomField.class, fieldName);
-        if (field == null) {
-            throw new RuntimeException("There is no field called " + fieldName + " in the CustomField class.");
-        }
+        throwIfFieldIsNull(field, fieldName);
         try {
             field.setAccessible(true);
             return (String) field.get(this);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private void throwIfFieldIsNull(Field field, String fieldName) {
+        if (field == null) {
+            throw new EntityNotException("There is no field called " + fieldName + " in the CustomField class.");
         }
     }
 }

@@ -3,6 +3,7 @@ package com.karthick.customerrecordsmanagement.fileuploadstatus;
 import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetail;
 import com.karthick.customerrecordsmanagement.csvfiledetail.CsvFileDetailService;
 import com.karthick.customerrecordsmanagement.exception.BadRequestException;
+import com.karthick.customerrecordsmanagement.exception.EntityNotException;
 import com.karthick.customerrecordsmanagement.kafka.KafkaProducer;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -33,7 +33,7 @@ public class FileUploadStatusService {
     public FileUploadStatus fetchFileUploadStatusByIdAndAccountId(long id, long accountId) {
         Optional<FileUploadStatus> fileUploadStatus = fileUploadStatusRepository.findByIdAndAccountId(id, accountId);
         if (fileUploadStatus.isEmpty()) {
-            throw new NoSuchElementException("The uploaded file status with the Id of " + id + " is not found");
+            throw new EntityNotException("The uploaded file status with the Id of " + id + " is not found");
         }
         return fileUploadStatus.get();
     }

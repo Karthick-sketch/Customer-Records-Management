@@ -1,9 +1,9 @@
 package com.karthick.customerrecordsmanagement.csvfiledetail;
 
+import com.karthick.customerrecordsmanagement.exception.EntityNotException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -14,7 +14,7 @@ public class CsvFileDetailService {
     public CsvFileDetail fetchCsvFileDetailById(long id) {
         Optional<CsvFileDetail> csvFileDetail = csvFileDetailRepository.findById(id);
         if (csvFileDetail.isEmpty()) {
-            throw new NoSuchElementException("file not found");
+            throw new EntityNotException("file not found");
         }
         return csvFileDetail.get();
     }

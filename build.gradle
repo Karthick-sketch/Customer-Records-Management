@@ -20,6 +20,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.kafka:spring-kafka'
 	implementation 'com.opencsv:opencsv:5.9'
+	implementation 'org.modelmapper:modelmapper:3.2.0'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 //	runtimeOnly 'com.h2database:h2:2.2.224'
 	compileOnly 'org.projectlombok:lombok:1.18.30'
