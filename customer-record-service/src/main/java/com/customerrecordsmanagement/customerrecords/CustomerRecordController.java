@@ -20,7 +20,7 @@ public class CustomerRecordController {
 
     @GetMapping("/account/{accountId}/id/{id}")
     public ResponseEntity<CustomerRecordDTO> getCustomerRecordById(@PathVariable long accountId, @PathVariable long id) {
-        return new ResponseEntity<>(customerRecordService.fetchCustomerRecordByIdAndAccountId(id, accountId), HttpStatus.OK);
+        return new ResponseEntity<>(customerRecordService.fetchCustomerRecordAndCustomFieldsByIdAndAccountId(id, accountId), HttpStatus.OK);
     }
 
     @PostMapping

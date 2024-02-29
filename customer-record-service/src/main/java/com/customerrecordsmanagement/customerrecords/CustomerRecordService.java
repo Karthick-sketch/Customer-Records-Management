@@ -6,6 +6,7 @@ import com.customerrecordsmanagement.customfieldmapping.CustomFieldMapping;
 import com.customerrecordsmanagement.customfieldmapping.CustomFieldMappingService;
 import com.customerrecordsmanagement.customfields.CustomFieldService;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -27,15 +28,19 @@ public class CustomerRecordService {
                 .toList();
     }
 
-    public CustomerRecordDTO fetchCustomerRecordByIdAndAccountId(long id, long accountId) {
+    public CustomerRecord fetchCustomerRecordByIdAndAccountId(long id, long accountId) {
         Optional<CustomerRecord> customerRecord = customerRecordRepository.findByIdAndAccountId(id, accountId);
         if (customerRecord.isEmpty()) {
             throw new EntityNotException("There is no customer record with the Id of " + id);
         }
-        return new CustomerRecordDTO(customerRecord.get(), customFieldService.reverseMapCustomFields(accountId, id));
+        return customerRecord.get();
     }
 
-    public CustomerRecord createCustomerRecord(CustomerRecord customerRecord) {
+    public CustomerRecordDTO fetchCustomerRecordAndCustomFieldsByIdAndAccountId(long id, long accountId) {
+        return new CustomerRecordDTO(fetchCustomerRecordByIdAndAccountId(id, accountId), customFieldService.reverseMapCustomFields(accountId, id));
+    }
+
+    public CustomerRecord createCustomerRecord(@NonNull CustomerRecord customerRecord) {
         try {
             return customerRecordRepository.save(customerRecord);
         } catch (DataIntegrityViolationException e) {
