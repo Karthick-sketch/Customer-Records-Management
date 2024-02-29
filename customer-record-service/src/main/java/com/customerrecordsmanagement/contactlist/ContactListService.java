@@ -1,10 +1,12 @@
 package com.customerrecordsmanagement.contactlist;
 
+import com.customerrecordsmanagement.BadRequestException;
 import com.customerrecordsmanagement.EntityNotException;
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.CustomerRecordService;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,15 +41,27 @@ public class ContactListService {
     }
 
     public ContactList createContactList(@NonNull ContactList contactList) {
-        return contactListRepository.save(contactList);
+        try {
+            return contactListRepository.save(contactList);
+        } catch (DataIntegrityViolationException e) {
+            throw new BadRequestException("The contact list " + contactList.getListName() + " is already present");
+        }
+    }
+
+    public void createContactListMapping(@NonNull ContactListMapping contactListMapping) {
+        try {
+            contactListMappingRepository.save(contactListMapping);
+        } catch (DataIntegrityViolationException e) {
+            throw new BadRequestException("The customer record " + contactListMapping.getCustomerRecord().getEmail() + " is already present");
+        }
     }
 
     public void addCustomerRecordsToList(ContactListAddDTO contactListAddDTO) {
         long accountId = contactListAddDTO.getAccountId();
         ContactList contactList = fetchContactListByIdAndAccountId(contactListAddDTO.getListId(), accountId);
-        contactListAddDTO.getCustomerRecordIds().forEach(id -> {
+        for (long id : contactListAddDTO.getCustomerRecordIds()) {
             CustomerRecord customerRecord = customerRecordService.fetchCustomerRecordByIdAndAccountId(id, accountId);
-            contactListMappingRepository.save(new ContactListMapping(accountId, contactList, customerRecord));
-        });
+            createContactListMapping(new ContactListMapping(accountId, contactList, customerRecord));
+        }
     }
 }

@@ -6,6 +6,7 @@ import com.customerrecordsmanagement.customerrecords.CustomerRecordDTO;
 import com.customerrecordsmanagement.customfieldmapping.CustomFieldMapping;
 import com.customerrecordsmanagement.customfieldmapping.CustomFieldMappingService;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,7 +20,7 @@ public class CustomFieldService {
     private CustomFieldRepository customFieldRepository;
     private CustomFieldMappingService customFieldMappingService;
 
-    public CustomField createCustomField(CustomField customField) {
+    public CustomField createCustomField(@NonNull CustomField customField) {
         return customFieldRepository.save(customField);
     }
 
