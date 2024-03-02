@@ -1,2 +1,2 @@
 rootProject.name = 'customerrecordsmanagement'
-include('main', 'common', 'customer-record-service', 'file-uploads-service', 'exception-handlers')
+include('main', 'common', 'customer-record-service', 'exception-handlers')

@@ -1,4 +1,4 @@
-package com.customerrecordsmanagement.customfieldmapping;
+package com.customerrecordsmanagement.customfields.customfieldmapping;
 
 import jakarta.persistence.*;
 import lombok.Data;

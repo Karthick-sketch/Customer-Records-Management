@@ -2,8 +2,8 @@ package com.customerrecordsmanagement.customerrecords;
 
 import com.customerrecordsmanagement.BadRequestException;
 import com.customerrecordsmanagement.EntityNotException;
-import com.customerrecordsmanagement.customfieldmapping.CustomFieldMapping;
-import com.customerrecordsmanagement.customfieldmapping.CustomFieldMappingService;
+import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMapping;
+import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
 import com.customerrecordsmanagement.customfields.CustomFieldService;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;

@@ -1,7 +1,7 @@
 package com.customerrecordsmanagement.customfields;
 
-import com.customerrecordsmanagement.customfieldmapping.CustomFieldMappingDTO;
-import com.customerrecordsmanagement.customfieldmapping.CustomFieldMappingService;
+import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingDTO;
+import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

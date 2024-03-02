@@ -1,4 +1,4 @@
-package com.customerrecordsmanagement.customfieldmapping;
+package com.customerrecordsmanagement.customfields.customfieldmapping;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

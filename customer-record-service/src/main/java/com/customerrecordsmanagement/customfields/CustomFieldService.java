@@ -3,8 +3,8 @@ package com.customerrecordsmanagement.customfields;
 import com.customerrecordsmanagement.EntityNotException;
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.CustomerRecordDTO;
-import com.customerrecordsmanagement.customfieldmapping.CustomFieldMapping;
-import com.customerrecordsmanagement.customfieldmapping.CustomFieldMappingService;
+import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMapping;
+import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
@@ -38,11 +38,11 @@ public class CustomFieldService {
 
     public Map<String, String> reverseMapCustomFields(long accountId, long customerRecordId) {
         List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(accountId);
-        Optional<CustomField> customFieldOptional = customFieldRepository.findByCustomerRecordId(customerRecordId);
-        if (customFieldMappings.isEmpty() || customFieldOptional.isEmpty()) {
+        Optional<CustomField> customField = customFieldRepository.findByCustomerRecordId(customerRecordId);
+        if (customFieldMappings.isEmpty() || customField.isEmpty()) {
             return null;
         }
-        return convertCustomFieldsToMap(customFieldOptional.get(), customFieldMappings);
+        return convertCustomFieldsToMap(customField.get(), customFieldMappings);
     }
 
     private String findColumnNameByCustomFieldName(String columnName, List<CustomFieldMapping> customFieldMappings) {
@@ -56,6 +56,6 @@ public class CustomFieldService {
 
     private Map<String, String> convertCustomFieldsToMap(CustomField customField, List<CustomFieldMapping> customFieldMapping) {
         return customFieldMapping.stream()
-                .collect(Collectors.toMap(CustomFieldMapping::getFieldName, cfm -> customField.getValueByFieldName(cfm.getFieldName())));
+                .collect(Collectors.toMap(CustomFieldMapping::getCustomFieldName, cfm -> customField.getValueByFieldName(cfm.getFieldName())));
     }
 }

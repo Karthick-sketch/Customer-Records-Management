@@ -1,4 +1,4 @@
-package com.customerrecordsmanagement.customfieldmapping;
+package com.customerrecordsmanagement.customfields.customfieldmapping;
 
 import com.customerrecordsmanagement.BadRequestException;
 import com.customerrecordsmanagement.customfields.CustomField;
@@ -9,7 +9,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -27,15 +26,13 @@ public class CustomFieldMappingService {
 
     public CustomFieldMappingDTO createCustomFieldMapping(CustomFieldMappingDTO customFieldMappingDTO) {
         List<String> fields = CustomField.getFieldNames();
-        Optional<String> freeField = fetchCustomFieldMappingByAccountId(customFieldMappingDTO.getAccountId()).stream()
-                .map(CustomFieldMapping::getFieldName)
-                .filter(fieldName -> !fields.contains(fieldName))
-                .findFirst();
-        if (freeField.isEmpty()) {
+        fetchCustomFieldMappingByAccountId(customFieldMappingDTO.getAccountId())
+                .forEach(customFieldMapping -> fields.remove(customFieldMapping.getFieldName()));
+        if (fields.isEmpty()) {
             throw new BadRequestException("Custom field limit exceed");
         }
         CustomFieldMapping customFieldMapping = convertToCustomFieldMapping(customFieldMappingDTO);
-        customFieldMapping.setFieldName(freeField.get());
+        customFieldMapping.setFieldName(fields.get(0));
         return convertToCustomFieldMappingDTO(createCustomFieldMapping(customFieldMapping));
     }
 

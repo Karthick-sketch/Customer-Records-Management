@@ -1,4 +1,4 @@
-package com.customerrecordsmanagement.customfieldmapping;
+package com.customerrecordsmanagement.customfields.customfieldmapping;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
