@@ -1,14 +1,13 @@
-package com.customerrecordsmanagement.kafka;
+package com.customerrecordsmanagement.fileuploadprocess;
 
-import com.customerrecordsmanagement.fileuploadprocess.FileUploadProcess;
-import com.customerrecordsmanagement.kafka.config.FileUploadEvent;
+import com.customerrecordsmanagement.config.FileUploadEvent;
 import lombok.Setter;
 
-public class KafkaThreadPool {
+public class FileUploadEventThreadPool {
     private final FileUploadProcess fileUploadProcess;
     private final ThreadPool[] threadPools = new ThreadPool[5];
 
-    public KafkaThreadPool(FileUploadProcess fileUploadProcess) {
+    public FileUploadEventThreadPool(FileUploadProcess fileUploadProcess) {
         this.fileUploadProcess = fileUploadProcess;
         for (int i = 0; i < threadPools.length; i++) {
             threadPools[i] = new ThreadPool();
@@ -23,7 +22,7 @@ public class KafkaThreadPool {
                 return;
             }
         }
-        try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+        try { Thread.sleep(50); } catch (InterruptedException ignored) {}
         execute(fileUploadEvent);
     }
 

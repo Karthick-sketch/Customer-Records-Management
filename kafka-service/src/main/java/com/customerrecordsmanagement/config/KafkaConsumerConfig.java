@@ -1,4 +1,4 @@
-package com.customerrecordsmanagement.kafka.config;
+package com.customerrecordsmanagement.config;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;

@@ -1,7 +1,7 @@
-package com.customerrecordsmanagement.kafka;
+package com.customerrecordsmanagement.fileuploadprocess;
 
-import com.customerrecordsmanagement.kafka.config.FileUploadEvent;
-import com.customerrecordsmanagement.kafka.config.KafkaConstants;
+import com.customerrecordsmanagement.config.FileUploadEvent;
+import com.customerrecordsmanagement.config.KafkaConstants;
 import lombok.AllArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -12,10 +12,10 @@ import java.util.logging.Logger;
 
 @Component
 @AllArgsConstructor
-public class KafkaProducer {
+public class FileUploadEventKafkaProducer {
     private KafkaTemplate<String, FileUploadEvent> kafkaTemplate;
 
-    private final Logger logger = Logger.getLogger(KafkaProducer.class.getName());
+    private final Logger logger = Logger.getLogger(FileUploadEventKafkaProducer.class.getName());
 
     public void publishKafkaMessage(long accountId, long fileId, long fileUploadStatusId) {
         FileUploadEvent fileUploadEvent = new FileUploadEvent(accountId, fileId, fileUploadStatusId);

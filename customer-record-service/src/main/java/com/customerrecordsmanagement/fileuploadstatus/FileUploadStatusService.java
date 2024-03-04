@@ -2,9 +2,9 @@ package com.customerrecordsmanagement.fileuploadstatus;
 
 import com.customerrecordsmanagement.BadRequestException;
 import com.customerrecordsmanagement.EntityNotException;
-import com.customerrecordsmanagement.kafka.KafkaProducer;
 import com.customerrecordsmanagement.csvfiledetail.CsvFileDetail;
 import com.customerrecordsmanagement.csvfiledetail.CsvFileDetailService;
+import com.customerrecordsmanagement.fileuploadprocess.FileUploadEventKafkaProducer;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 public class FileUploadStatusService {
     private FileUploadStatusRepository fileUploadStatusRepository;
     private CsvFileDetailService csvFileDetailService;
-    private KafkaProducer kafkaProducer;
+    private FileUploadEventKafkaProducer kafkaProducer;
 
     private final Logger logger = Logger.getLogger(FileUploadStatusService.class.getName());
 

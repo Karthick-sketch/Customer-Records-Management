@@ -1,4 +1,4 @@
-package com.customerrecordsmanagement.kafka.config;
+package com.customerrecordsmanagement.config;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;

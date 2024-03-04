@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'com.customerrecordsmanagement'
+group = 'com.customerrecordsmanagement.exceptionhandlers'
 version = '0.0.1-SNAPSHOT'
 
 repositories {

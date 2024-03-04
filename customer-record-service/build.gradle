@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group = 'com.customerrecordsmanagement'
+group = 'com.customerrecordsmanagement.customerrecordservice'
 version = '0.0.1-SNAPSHOT'
 
 repositories {
@@ -12,9 +12,8 @@ repositories {
 dependencies {
     implementation project(':common')
     implementation project(':exception-handlers')
+    implementation project(':kafka-service')
     implementation 'com.opencsv:opencsv:5.9'
-    implementation 'org.springframework.kafka:spring-kafka'
-    testImplementation 'org.springframework.kafka:spring-kafka-test'
     testImplementation platform('org.junit:junit-bom:5.9.1')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
