@@ -4,17 +4,18 @@ import com.customerrecordsmanagement.BadRequestException;
 import com.customerrecordsmanagement.EntityNotException;
 import com.customerrecordsmanagement.csvfiledetail.CsvFileDetail;
 import com.customerrecordsmanagement.csvfiledetail.CsvFileDetailService;
+import com.customerrecordsmanagement.fileuploadprocess.FileExportProcess;
 import com.customerrecordsmanagement.fileuploadprocess.FileUploadEventKafkaProducer;
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.PathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Service
@@ -22,7 +23,8 @@ import java.util.logging.Logger;
 public class FileUploadStatusService {
     private FileUploadStatusRepository fileUploadStatusRepository;
     private CsvFileDetailService csvFileDetailService;
-    private FileUploadEventKafkaProducer kafkaProducer;
+    private FileUploadEventKafkaProducer fileUploadEventKafkaProducer;
+    private FileExportProcess fileExportProcess;
 
     private final Logger logger = Logger.getLogger(FileUploadStatusService.class.getName());
 
@@ -58,12 +60,12 @@ public class FileUploadStatusService {
         if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
             throw new BadRequestException("Only CSV files are allowed");
         }
-        String filePath = getFilePath(file.getOriginalFilename());
+        String filePath = getFilePath(file.getOriginalFilename(), true);
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
             fileOutputStream.write(file.getBytes());
             CsvFileDetail csvFileDetail = csvFileDetailService.saveCsvFileDetail(accountId, file.getOriginalFilename(), filePath);
             FileUploadStatus fileUploadStatus = createNewFileUploadStatus(accountId, csvFileDetail.getFileName());
-            kafkaProducer.publishKafkaMessage(accountId, csvFileDetail.getId(), fileUploadStatus.getId());
+            fileUploadEventKafkaProducer.publishKafkaMessage(accountId, csvFileDetail.getId(), fileUploadStatus.getId());
             logger.info(file.getOriginalFilename() + " file upload");
             return new FileUploadStatusDTO(fileUploadStatus.getId());
         } catch (IOException e) {
@@ -72,7 +74,14 @@ public class FileUploadStatusService {
         return null;
     }
 
-    private String getFilePath(String fileName) {
-        return System.getProperty("user.dir") + "/src/main/resources/uploads/" + fileName;
+    public Resource exportCsvFile(long accountId) {
+        String fileName = accountId + "-customer-records-" + LocalDateTime.now() + ".csv";
+        String filePath = getFilePath(fileName, false);
+        fileExportProcess.writeCustomerRecordDataToCsvFile(accountId, filePath);
+        return new PathResource(filePath);
+    }
+
+    public String getFilePath(String fileName, boolean isUpload) {
+        return System.getProperty("user.dir") + "/src/main/resources/" + (isUpload ? "uploads/" : "exports/") + fileName;
     }
 }

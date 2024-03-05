@@ -1,7 +1,10 @@
 package com.customerrecordsmanagement.fileuploadstatus;
 
 import lombok.AllArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,6 +25,15 @@ public class FileUploadStatusController {
     @GetMapping("/{accountId}/id/{id}")
     public ResponseEntity<FileUploadStatus> getFileUploadStatusById(@PathVariable long accountId, long id) {
         return new ResponseEntity<>(fileUploadStatusService.fetchFileUploadStatusByIdAndAccountId(id, accountId), HttpStatus.OK);
+    }
+
+    @GetMapping("{accountId}/export-csv")
+    public ResponseEntity<Resource> exportCsvFile(@PathVariable long accountId) {
+        Resource resource = fileUploadStatusService.exportCsvFile(accountId);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + resource.getFilename())
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
     }
 
     @PostMapping("/{accountId}/upload-csv")

@@ -22,6 +22,12 @@ public class CustomerRecordService {
     private CustomFieldService customFieldService;
     private CustomFieldMappingService customFieldMappingService;
 
+    public List<CustomerRecordDTO> fetchCustomerRecordsByAccountId(long accountId) {
+        return customerRecordRepository.findByAccountId(accountId).stream()
+                .map(customerRecord -> new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(accountId, customerRecord.getId())))
+                .toList();
+    }
+
     public List<CustomerRecordDTO> fetchCustomerRecords(long accountId, int pageNumber, int pageSize) {
         return customerRecordRepository.findAll(PageRequest.of(pageNumber, pageSize)).stream()
                 .map(customerRecord -> new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(accountId, customerRecord.getId())))

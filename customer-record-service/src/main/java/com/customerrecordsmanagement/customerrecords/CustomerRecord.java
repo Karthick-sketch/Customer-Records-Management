@@ -38,6 +38,7 @@ public class CustomerRecord {
     public static List<String> getFields() {
         return Stream.of(CustomerRecord.class.getDeclaredFields())
                 .map(Field::getName)
+                .filter(fieldName -> !(fieldName.equals("id") || fieldName.equals("customField")))
                 .toList();
     }
 }
