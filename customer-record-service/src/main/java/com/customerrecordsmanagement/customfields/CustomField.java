@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.id.IncrementGenerator;
 import org.springframework.util.ReflectionUtils;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 
 @Data
 @NoArgsConstructor
+@ToString(exclude = {"customerRecord"})
 @Entity(name = "custom_fields")
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId", "customer_record_id"})})
 public class CustomField {

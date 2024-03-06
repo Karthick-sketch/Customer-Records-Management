@@ -24,13 +24,13 @@ public class CustomerRecordService {
 
     public List<CustomerRecordDTO> fetchCustomerRecordsByAccountId(long accountId) {
         return customerRecordRepository.findByAccountId(accountId).stream()
-                .map(customerRecord -> new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(accountId, customerRecord.getId())))
+                .map(customerRecord -> new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord)))
                 .toList();
     }
 
     public List<CustomerRecordDTO> fetchCustomerRecords(long accountId, int pageNumber, int pageSize) {
-        return customerRecordRepository.findAll(PageRequest.of(pageNumber, pageSize)).stream()
-                .map(customerRecord -> new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(accountId, customerRecord.getId())))
+        return customerRecordRepository.findByAccountId(accountId, PageRequest.of(pageNumber, pageSize)).stream()
+                .map(customerRecord -> new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord)))
                 .toList();
     }
 
@@ -43,7 +43,8 @@ public class CustomerRecordService {
     }
 
     public CustomerRecordDTO fetchCustomerRecordAndCustomFieldsByIdAndAccountId(long id, long accountId) {
-        return new CustomerRecordDTO(fetchCustomerRecordByIdAndAccountId(id, accountId), customFieldService.reverseMapCustomFields(accountId, id));
+        CustomerRecord customerRecord = fetchCustomerRecordByIdAndAccountId(id, accountId);
+        return new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord));
     }
 
     public CustomerRecord createCustomerRecord(@NonNull CustomerRecord customerRecord) {

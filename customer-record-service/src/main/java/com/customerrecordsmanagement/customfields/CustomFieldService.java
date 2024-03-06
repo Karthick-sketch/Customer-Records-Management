@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,13 +35,13 @@ public class CustomFieldService {
         return customField;
     }
 
-    public Map<String, String> reverseMapCustomFields(long accountId, long customerRecordId) {
-        List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(accountId);
-        Optional<CustomField> customField = customFieldRepository.findByCustomerRecordId(customerRecordId);
-        if (customFieldMappings.isEmpty() || customField.isEmpty()) {
+    public Map<String, String> reverseMapCustomFields(CustomerRecord customerRecord) {
+        List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(customerRecord.getAccountId());
+        CustomField customField = customerRecord.getCustomField();
+        if (customFieldMappings.isEmpty() || customField == null) {
             return null;
         }
-        return convertCustomFieldsToMap(customField.get(), customFieldMappings);
+        return convertCustomFieldsToMap(customField, customFieldMappings);
     }
 
     private String findColumnNameByCustomFieldName(String columnName, List<CustomFieldMapping> customFieldMappings) {

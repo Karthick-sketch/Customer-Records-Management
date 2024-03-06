@@ -1,4 +1,4 @@
-package com.customerrecordsmanagement.fileuploadprocess;
+package com.customerrecordsmanagement.fileprocess;
 
 import com.customerrecordsmanagement.csvfiledetail.CsvFileDetail;
 import com.customerrecordsmanagement.csvfiledetail.CsvFileDetailService;
@@ -13,7 +13,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvException;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileReader;
@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
-@Service
+@Component
 @AllArgsConstructor
 public class FileUploadProcess {
     private CustomerRecordService customerRecordService;

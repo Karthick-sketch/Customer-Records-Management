@@ -1,4 +1,4 @@
-package com.customerrecordsmanagement.fileuploadprocess;
+package com.customerrecordsmanagement.fileprocess;
 
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.CustomerRecordDTO;
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
-@Service
+@Component
 @AllArgsConstructor
 public class FileExportProcess {
     private CustomerRecordService customerRecordService;

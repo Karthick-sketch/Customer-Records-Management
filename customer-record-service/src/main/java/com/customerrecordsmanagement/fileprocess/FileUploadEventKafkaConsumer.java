@@ -1,4 +1,4 @@
-package com.customerrecordsmanagement.fileuploadprocess;
+package com.customerrecordsmanagement.fileprocess;
 
 import com.customerrecordsmanagement.config.FileUploadEvent;
 import com.customerrecordsmanagement.config.KafkaConstants;
