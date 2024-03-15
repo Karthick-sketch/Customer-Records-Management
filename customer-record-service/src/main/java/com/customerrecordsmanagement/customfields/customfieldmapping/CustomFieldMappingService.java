@@ -47,7 +47,11 @@ public class CustomFieldMappingService {
     }
 
     public List<String> fetchCustomFieldNamesByAccountId(long accountId) {
-        return customFieldMappingRepository.findCustomFieldNameByAccountId(accountId);
+        return customFieldMappingRepository.findCustomFieldNamesByAccountId(accountId);
+    }
+
+    public List<String> fetchFieldNamesByAccountId(long accountId) {
+        return customFieldMappingRepository.findFieldNamesByAccountId(accountId);
     }
 
     private CustomFieldMapping convertToCustomFieldMapping(CustomFieldMappingDTO customFieldMappingDTO) {

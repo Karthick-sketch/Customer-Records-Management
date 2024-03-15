@@ -11,5 +11,8 @@ public interface CustomFieldMappingRepository extends JpaRepository<CustomFieldM
     List<CustomFieldMapping> findByAccountId(long accountId);
 
     @Query(value = "SELECT custom_field_name FROM custom_fields_mapping WHERE account_id = ?;", nativeQuery = true)
-    List<String> findCustomFieldNameByAccountId(long accountId);
+    List<String> findCustomFieldNamesByAccountId(long accountId);
+
+    @Query(value = "SELECT field_name FROM custom_fields_mapping WHERE account_id = ?;", nativeQuery = true)
+    List<String> findFieldNamesByAccountId(long accountId);
 }

@@ -3,6 +3,7 @@ package com.customerrecordsmanagement.fileuploadstatus;
 import lombok.AllArgsConstructor;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.PathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -16,11 +17,16 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/upload-status/account")
-@AllArgsConstructor
 public class FileUploadStatusController {
-    private FileUploadStatusService fileUploadStatusService;
-    private JobLauncher jobLauncher;
-    private Job job;
+    private final FileUploadStatusService fileUploadStatusService;
+    private final JobLauncher jobLauncher;
+    private final Job job;
+
+    public FileUploadStatusController(FileUploadStatusService fileUploadStatusService, @Qualifier("jobLauncher") JobLauncher jobLauncher, @Qualifier("customerRecordJob") Job job) {
+        this.fileUploadStatusService = fileUploadStatusService;
+        this.jobLauncher = jobLauncher;
+        this.job = job;
+    }
 
     @GetMapping("/{accountId}/all")
     public ResponseEntity<List<FileUploadStatus>> getAllFileUploadStatus(@PathVariable long accountId) {
