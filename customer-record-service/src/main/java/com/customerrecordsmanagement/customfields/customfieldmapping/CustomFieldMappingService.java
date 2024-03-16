@@ -50,10 +50,6 @@ public class CustomFieldMappingService {
         return customFieldMappingRepository.findCustomFieldNamesByAccountId(accountId);
     }
 
-    public List<String> fetchFieldNamesByAccountId(long accountId) {
-        return customFieldMappingRepository.findFieldNamesByAccountId(accountId);
-    }
-
     private CustomFieldMapping convertToCustomFieldMapping(CustomFieldMappingDTO customFieldMappingDTO) {
         return modelMapper.map(customFieldMappingDTO, CustomFieldMapping.class);
     }

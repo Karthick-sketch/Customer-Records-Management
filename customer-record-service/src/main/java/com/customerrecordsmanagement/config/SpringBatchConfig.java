@@ -2,9 +2,13 @@ package com.customerrecordsmanagement.config;
 
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
-import lombok.AllArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -19,6 +23,7 @@ import org.springframework.batch.item.database.support.SqlPagingQueryProviderFac
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
 import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
@@ -36,12 +41,26 @@ import java.util.stream.Stream;
 
 @Configuration
 @EnableBatchProcessing
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SpringBatchConfig {
+    @NonNull
     private DataSource dataSource;
+    @NonNull
     private PlatformTransactionManager transactionManager;
+    @NonNull
     private CustomerRecordMapper customerRecordMapper;
+    @NonNull
     private CustomFieldMappingService customFieldMappingService;
+
+    private Long accountId;
+    private String filePath;
+
+    @BeforeStep
+    public void beforeStep(StepExecution stepExecution) {
+        JobParameters parameters = stepExecution.getJobExecution().getJobParameters();
+        this.accountId = parameters.getLong("accountId");
+        this.filePath = parameters.getString("filePath");
+    }
 
     @Bean(name = "customerRecordJob")
     public Job job() throws Exception {
@@ -54,9 +73,9 @@ public class SpringBatchConfig {
     public Step step() throws Exception {
         return new StepBuilder("customerRecordStep", getJobRepository())
                 .<CustomerRecord, CustomerRecord>chunk(100, transactionManager)
-                .reader(dbReader())
+                .reader(dbReader(accountId))
                 .processor(itemProcessor())
-                .writer(fileWriter())
+                .writer(fileWriter(accountId, filePath))
                 .taskExecutor(taskExecutor())
                 .build();
     }
@@ -99,13 +118,14 @@ public class SpringBatchConfig {
 
     @Bean
     @StepScope
-    public FlatFileItemWriter<CustomerRecord> fileWriter() {
+    public FlatFileItemWriter<CustomerRecord> fileWriter(@Value("#{jobParameters[accountId]}") Long accountId, @Value("#{jobParameters[filePath]}") String filePath) {
         List<String> customerRecordFieldNames = CustomerRecord.getFields();
-        List<String> customFieldNames = customFieldMappingService.fetchCustomFieldNamesByAccountId(1);
+        List<String> customFieldNames = customFieldMappingService.fetchCustomFieldNamesByAccountId(accountId);
         List<String> headers = Stream.concat(customerRecordFieldNames.stream(), customFieldNames.stream()).toList();
 
         FlatFileItemWriter<CustomerRecord> writer = new FlatFileItemWriter<>();
-        writer.setResource(new FileSystemResource("data/output.csv"));
+        writer.setResource(new FileSystemResource(filePath));
+
         writer.setHeaderCallback(writer1 -> writer1.write(String.join(",", headers)));
 
         BeanWrapperFieldExtractor<CustomerRecord> fieldExtractor = new BeanWrapperFieldExtractor<>();
@@ -113,7 +133,6 @@ public class SpringBatchConfig {
 
         CustomRecordDelimitedLineAggregator<CustomerRecord> lineAggregator = new CustomRecordDelimitedLineAggregator<>();
         lineAggregator.setFieldExtractor(fieldExtractor);
-        lineAggregator.setCustomFieldNames(customFieldMappingService.fetchFieldNamesByAccountId(1));
 
         writer.setLineAggregator(lineAggregator);
         return writer;
@@ -121,16 +140,15 @@ public class SpringBatchConfig {
 
     @Bean
     @StepScope
-    public ItemStreamReader<CustomerRecord> dbReader() throws Exception {
-        return itemStreamReader(customerRecordMapper);
+    public ItemStreamReader<CustomerRecord> dbReader(@Value("#{jobParameters[accountId]}") Long accountId) throws Exception {
+        return itemStreamReader(accountId, customerRecordMapper);
     }
 
-    @Bean
     @StepScope
-    public ItemStreamReader<CustomerRecord> itemStreamReader(RowMapper<CustomerRecord> rowMapper) throws Exception {
+    public ItemStreamReader<CustomerRecord> itemStreamReader(Long accountId, RowMapper<CustomerRecord> rowMapper) throws Exception {
         JdbcPagingItemReader<CustomerRecord> reader = new JdbcPagingItemReader<>();
         reader.setDataSource(dataSource);
-        SqlPagingQueryProviderFactoryBean sqlPagingQueryProviderFactoryBean = getSqlPagingQueryProviderFactoryBean();
+        SqlPagingQueryProviderFactoryBean sqlPagingQueryProviderFactoryBean = getSqlPagingQueryProviderFactoryBean(accountId);
         reader.setQueryProvider(Objects.requireNonNull(sqlPagingQueryProviderFactoryBean.getObject()));
         reader.setPageSize(10_000);
         reader.setRowMapper(rowMapper);
@@ -139,11 +157,12 @@ public class SpringBatchConfig {
         return reader;
     }
 
-    private SqlPagingQueryProviderFactoryBean getSqlPagingQueryProviderFactoryBean() {
+    private SqlPagingQueryProviderFactoryBean getSqlPagingQueryProviderFactoryBean(Long accountId) {
         SqlPagingQueryProviderFactoryBean sqlPagingQueryProviderFactoryBean = new SqlPagingQueryProviderFactoryBean();
         sqlPagingQueryProviderFactoryBean.setDataSource(dataSource);
         sqlPagingQueryProviderFactoryBean.setSelectClause("select * ");
         sqlPagingQueryProviderFactoryBean.setFromClause("from customer_records join custom_fields on customer_records.id = custom_fields.customer_record_id");
+        sqlPagingQueryProviderFactoryBean.setWhereClause("where customer_records.account_id = " + accountId);
         sqlPagingQueryProviderFactoryBean.setSortKey("email");
         return sqlPagingQueryProviderFactoryBean;
     }

@@ -10,9 +10,6 @@ import java.util.List;
 public interface CustomFieldMappingRepository extends JpaRepository<CustomFieldMapping, Long> {
     List<CustomFieldMapping> findByAccountId(long accountId);
 
-    @Query(value = "SELECT custom_field_name FROM custom_fields_mapping WHERE account_id = ?;", nativeQuery = true)
+    @Query(value = "SELECT custom_field_name FROM custom_fields_mapping WHERE account_id = ? ORDER BY id;", nativeQuery = true)
     List<String> findCustomFieldNamesByAccountId(long accountId);
-
-    @Query(value = "SELECT field_name FROM custom_fields_mapping WHERE account_id = ?;", nativeQuery = true)
-    List<String> findFieldNamesByAccountId(long accountId);
 }

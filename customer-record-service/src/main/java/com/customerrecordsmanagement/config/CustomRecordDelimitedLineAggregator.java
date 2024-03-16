@@ -8,16 +8,14 @@ import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
 import org.springframework.batch.item.file.transform.FieldExtractor;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Setter
 public class CustomRecordDelimitedLineAggregator<T> extends DelimitedLineAggregator<T> {
     private FieldExtractor<T> fieldExtractor;
-    private List<String> customFieldNames;
+    private String delimiter = ",";
+    private String quoteCharacter = "'";
 
     @Override
     public @NonNull String doAggregate(Object @NonNull [] fields) {
@@ -29,42 +27,36 @@ public class CustomRecordDelimitedLineAggregator<T> extends DelimitedLineAggrega
     }
 
     private String castCustomerRecordToString(CustomerRecord customerRecord) {
-        List<String> customerRecordValues = new ArrayList<>();
-        Field[] fields = CustomerRecord.class.getDeclaredFields();
-        for (Field field : fields) {
-            field.setAccessible(true);
-            try {
-                if (field.getName().equals("customField")) {
-                    if (field.get(customerRecord) instanceof CustomField customField) {
-                        String customFieldValue = castCustomFieldToString(customField);
-                        customerRecordValues.add(customFieldValue);
-                    }
-                } else if (!field.getName().equals("id")) {
-                    customerRecordValues.add("'" + field.get(customerRecord).toString() + "'");
-                }
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return String.join(",", customerRecordValues);
+        List<String> customerRecordValues = Arrays.stream(CustomerRecord.class.getDeclaredFields())
+                .filter(field -> !field.getName().equals("id"))
+                .peek(field -> field.setAccessible(true))
+                .map(field -> field.getName().equals("customField")
+                        ? castCustomFieldToString((CustomField) getValueFromField(customerRecord, field))
+                        : wrapWithQuote(getValueFromField(customerRecord, field)))
+                .toList();
+        return String.join(delimiter, customerRecordValues);
     }
 
     private String castCustomFieldToString(CustomField customField) {
         List<String> nonFields = List.of("id", "accountId", "customerRecord");
-        Map<String, String> customFields = Arrays.stream(CustomField.class.getDeclaredFields())
+        List<String> customFields = Arrays.stream(CustomField.class.getDeclaredFields())
                 .filter(field -> !nonFields.contains(field.getName()))
                 .peek(field -> field.setAccessible(true))
-                .collect(Collectors.toMap(Field::getName, field -> {
-                    try {
-                        return "'" + field.get(customField).toString() + "'";
-                    } catch (IllegalAccessException e) {
-                        throw new RuntimeException(e);
-                    }
-                }));
-        List<String> customFieldValues = customFieldNames.stream()
-                .map(customFields::get)
+                .map(field -> wrapWithQuote(getValueFromField(customField, field)))
                 .toList();
 
-        return String.join(",", customFieldValues);
+        return String.join(delimiter, customFields);
+    }
+
+    private Object getValueFromField(Object object, Field field) {
+        try {
+            return field.get(object);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String wrapWithQuote(Object object) {
+        return quoteCharacter + object.toString() + quoteCharacter;
     }
 }

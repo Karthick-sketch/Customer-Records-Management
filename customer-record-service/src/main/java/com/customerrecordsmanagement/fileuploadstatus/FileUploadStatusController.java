@@ -1,6 +1,5 @@
 package com.customerrecordsmanagement.fileuploadstatus;
 
-import lombok.AllArgsConstructor;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -13,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -52,18 +53,23 @@ public class FileUploadStatusController {
         return new ResponseEntity<>(fileUploadStatusService.uploadCsvFile(accountId, file), HttpStatus.OK);
     }
 
-    @GetMapping("/startJob")
-    public ResponseEntity<Resource> startBatch() throws Exception {
-        System.out.println("batch started ...............");
+    @GetMapping("/{accountId}/startJob")
+    public ResponseEntity<Resource> startBatch(@PathVariable long accountId) throws Exception {
+        File file = new File("src/main/resources/exports/" + accountId + "-customer-records-" + LocalDateTime.now() + ".csv");
 
-        JobParameters jobParameter = new JobParameters();
+        System.out.println("Batch started ............");
+        JobParameters jobParameter = new JobParametersBuilder()
+                .addLong("accountId", accountId)
+                .addString("filePath", file.getAbsolutePath())
+                .toJobParameters();
+
         JobExecution jobExecution = jobLauncher.run(job, jobParameter);
         while (jobExecution.isRunning()) {
             System.out.println("......");
         }
-        System.out.println(jobExecution.getStatus());
+        System.out.println("Batch status : " + jobExecution.getStatus());
 
-        Resource resource = new PathResource("/home/karthick/Documents/Development/Spring Boot/Customer-Records-Management/data/output.csv");
+        Resource resource = new PathResource(file.getAbsolutePath());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + resource.getFilename())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
