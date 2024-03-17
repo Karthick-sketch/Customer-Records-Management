@@ -43,7 +43,10 @@ public class CustomerRecordService {
     }
 
     public CustomerRecordDTO fetchCustomerRecordAndCustomFieldsByIdAndAccountId(long id, long accountId) {
-        CustomerRecord customerRecord = fetchCustomerRecordByIdAndAccountId(id, accountId);
+        return convertCustomerRecordToCustomerRecordDTO(fetchCustomerRecordByIdAndAccountId(id, accountId));
+    }
+
+    public CustomerRecordDTO convertCustomerRecordToCustomerRecordDTO(CustomerRecord customerRecord) {
         return new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord));
     }
 

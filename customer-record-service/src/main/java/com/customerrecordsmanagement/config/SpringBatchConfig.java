@@ -103,9 +103,9 @@ public class SpringBatchConfig {
     @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(4);
-        executor.setQueueCapacity(4);
+        executor.setCorePoolSize(8);
+        executor.setMaxPoolSize(8);
+        executor.setQueueCapacity(8);
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setThreadNamePrefix("MultiThreaded-");
         return executor;
@@ -125,7 +125,6 @@ public class SpringBatchConfig {
 
         FlatFileItemWriter<CustomerRecord> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(filePath));
-
         writer.setHeaderCallback(writer1 -> writer1.write(String.join(",", headers)));
 
         BeanWrapperFieldExtractor<CustomerRecord> fieldExtractor = new BeanWrapperFieldExtractor<>();
