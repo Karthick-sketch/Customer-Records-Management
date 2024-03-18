@@ -74,6 +74,19 @@ public class FileUploadStatusService {
         return null;
     }
 
+    public void batchUploadCsvFile(MultipartFile file) {
+        if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
+            throw new BadRequestException("Only CSV files are allowed");
+        }
+        String filePath = getFilePath(file.getOriginalFilename(), true);
+        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
+            fileOutputStream.write(file.getBytes());
+            logger.info(file.getOriginalFilename() + " file upload");
+        } catch (IOException e) {
+            logger.severe(e.getMessage());
+        }
+    }
+
     public Resource exportCsvFile(long accountId) {
         String fileName = accountId + "-customer-records-" + LocalDateTime.now() + ".csv";
         String filePath = getFilePath(fileName, false);

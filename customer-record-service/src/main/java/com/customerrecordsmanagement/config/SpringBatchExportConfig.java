@@ -12,17 +12,14 @@ import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.support.TaskExecutorJobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.support.JobRepositoryFactoryBean;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
-import org.springframework.batch.support.transaction.ResourcelessTransactionManager;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,9 +39,11 @@ import java.util.stream.Stream;
 @Configuration
 @EnableBatchProcessing
 @RequiredArgsConstructor
-public class SpringBatchConfig {
+public class SpringBatchExportConfig {
     @NonNull
     private DataSource dataSource;
+    @NonNull
+    private JobRepository jobRepository;
     @NonNull
     private PlatformTransactionManager transactionManager;
     @NonNull
@@ -62,16 +61,16 @@ public class SpringBatchConfig {
         this.filePath = parameters.getString("filePath");
     }
 
-    @Bean(name = "customerRecordJob")
+    @Bean(name = "customerRecordExportJob")
     public Job job() throws Exception {
-        return new JobBuilder("customerRecordJob", getJobRepository())
+        return new JobBuilder("customerRecordExportJob", jobRepository)
                 .start(step()).build();
     }
 
-    @Bean
     @Async
+    @Bean(name = "customerRecordExportStep")
     public Step step() throws Exception {
-        return new StepBuilder("customerRecordStep", getJobRepository())
+        return new StepBuilder("customerRecordExportStep", jobRepository)
                 .<CustomerRecord, CustomerRecord>chunk(100, transactionManager)
                 .reader(dbReader(accountId))
                 .processor(itemProcessor())
@@ -80,27 +79,7 @@ public class SpringBatchConfig {
                 .build();
     }
 
-    @Bean(name = "jobLauncher")
-    public JobLauncher getJobLauncher() throws Exception {
-        TaskExecutorJobLauncher jobLauncher = new TaskExecutorJobLauncher();
-        jobLauncher.setJobRepository(getJobRepository());
-        jobLauncher.afterPropertiesSet();
-        return jobLauncher;
-    }
-
-    public JobRepository getJobRepository() throws Exception {
-        JobRepositoryFactoryBean factory = new JobRepositoryFactoryBean();
-        factory.setDataSource(dataSource);
-        factory.setTransactionManager(getTransactionManager());
-        factory.afterPropertiesSet();
-        return factory.getObject();
-    }
-
-    public PlatformTransactionManager getTransactionManager() {
-        return new ResourcelessTransactionManager();
-    }
-
-    @Bean
+    @Bean(name = "exportTaskExecutor")
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(8);
@@ -111,9 +90,10 @@ public class SpringBatchConfig {
         return executor;
     }
 
-    @Bean
-    public CustomerRecordItemProcessor itemProcessor() {
-        return new CustomerRecordItemProcessor();
+//    @Bean
+    @StepScope
+    public ItemProcessor<CustomerRecord, CustomerRecord> itemProcessor() {
+        return customerRecord -> customerRecord;
     }
 
     @Bean

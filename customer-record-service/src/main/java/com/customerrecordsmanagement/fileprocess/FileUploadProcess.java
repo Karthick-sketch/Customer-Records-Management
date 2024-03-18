@@ -30,6 +30,18 @@ public class FileUploadProcess {
 
     private final Logger logger = Logger.getLogger(FileUploadProcess.class.getName());
 
+    public void springBatchImport(long accountId, String filePath) {
+        List<String[]> csvRecords = readCsvFile(filePath);
+        if (csvRecords != null) {
+            createAllCustomerRecordsAndFileUploadStatus(accountId, csvRecords, 1);
+        } else {
+            logger.warning("File is empty");
+        }
+        if (!new File(filePath).delete()) {
+            logger.severe("Failed to delete the file");
+        }
+    }
+
     public void pushCustomerRecordsFromFileToDatabase(long accountId, long fileId, long fileUploadStatusId) {
         CsvFileDetail csvFileDetail = csvFileDetailService.fetchCsvFileDetailById(fileId);
         List<String[]> csvRecords = readCsvFile(csvFileDetail.getFilePath());
