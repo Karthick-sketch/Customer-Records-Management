@@ -25,7 +25,7 @@ public class CustomerRecordMapper implements RowMapper<CustomerRecord> {
         customerRecord.setCity(rs.getString("city"));
         customerRecord.setState(rs.getString("state"));
         customerRecord.setCountry(rs.getString("country"));
-        customerRecord.setZipcode(rs.getInt("zipcode"));
+        customerRecord.setZipcode(rs.getString("zipcode"));
 
         customerRecord.setCustomField(mapCustomField(rs));
 

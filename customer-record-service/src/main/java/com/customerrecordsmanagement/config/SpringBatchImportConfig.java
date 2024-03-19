@@ -2,8 +2,13 @@ package com.customerrecordsmanagement.config;
 
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.CustomerRecordRepository;
+import com.customerrecordsmanagement.customfields.CustomFieldService;
+import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMapping;
+import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.util.StringMap;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
@@ -14,6 +19,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
@@ -33,8 +39,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 @EnableBatchProcessing
@@ -46,8 +53,10 @@ public class SpringBatchImportConfig {
     private PlatformTransactionManager transactionManager;
     @Nonnull
     private CustomerRecordRepository customerRecordRepository;
-//    @Nonnull
-//    private CustomFieldMappingService customFieldMappingService;
+    @Nonnull
+    private CustomFieldService customFieldService;
+    @Nonnull
+    private CustomFieldMappingService customFieldMappingService;
 
     private Long accountId;
     private String filePath;
@@ -70,8 +79,9 @@ public class SpringBatchImportConfig {
     public Step step() {
         return new StepBuilder("customerRecordImportStep", jobRepository)
                 .<Map<String, String>, CustomerRecord>chunk(100, transactionManager)
-                .reader(itemReader(accountId, filePath))
-                .processor(itemProcessor())
+//                .reader(itemReader(accountId, filePath))
+                .reader(reader(accountId, filePath))
+                .processor(itemProcessor(accountId))
                 .writer(itemWriter())
                 .taskExecutor(taskExecutor())
                 .build();
@@ -84,24 +94,69 @@ public class SpringBatchImportConfig {
         return asyncTaskExecutor;
     }
 
-    @Bean
+    /*@Bean
     @StepScope
-    public FlatFileItemReader<Map<String, String>> itemReader(@Value("#{jobParameters[accountId]}") Long accountId, @Value("#{jobParameters[filePath]}") String filePath) {
-        return new FlatFileItemReaderBuilder<Map<String, String>>()
+    public FlatFileItemReader<StringMap> itemReader(@Value("#{jobParameters[accountId]}") Long accountId, @Value("#{jobParameters[filePath]}") String filePath) {
+        return new FlatFileItemReaderBuilder<StringMap>()
                 .name("customerRecordItemReader")
                 .resource(new FileSystemResource(filePath))
                 .linesToSkip(1)
                 .lineMapper(lineMapper(accountId, filePath))
                 .build();
+    }*/
+
+    @Bean
+    @StepScope
+    public FlatFileItemReader<Map<String, String>> reader(@Value("#{jobParameters[accountId]}") Long accountId, @Value("#{jobParameters[filePath]}") String filePath) {
+        FlatFileItemReader<Map<String, String>> reader = new FlatFileItemReader<>();
+        reader.setResource(new FileSystemResource(filePath));
+        reader.setLinesToSkip(1);
+
+        List<String> customerRecordFieldNames = CustomerRecord.getFields();
+        List<String> customFieldNames = customFieldMappingService.fetchCustomFieldNamesByAccountId(accountId);
+
+        String[] headers = getHeaders(filePath);
+        verifyHeaders(headers, Stream.concat(customerRecordFieldNames.stream(), customFieldNames.stream()).toList());
+
+        reader.setLineMapper(new DefaultLineMapper<>() {{
+            setLineTokenizer(new DelimitedLineTokenizer() {{
+                setNames(headers);
+            }});
+            setFieldSetMapper(fieldSet -> Arrays.stream(headers)
+                        .collect(Collectors.toMap(header -> header, fieldSet::readString)));
+        }});
+        return reader;
     }
 
     @Bean
     @StepScope
-    public CustomerRecordItemProcessor itemProcessor() {
-        return new CustomerRecordItemProcessor();
+    public ItemProcessor<Map<String, String>, CustomerRecord> itemProcessor(@Value("#{jobParameters[accountId]}") Long accountId) {
+        return stringMap -> {
+            stringMap.put("accountId", accountId.toString());
+
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            List<String> customerRecordFields = CustomerRecord.getFields();
+            Map<String, String> customerRecordMap = customerRecordFields.stream()
+                    .collect(Collectors.toMap(field -> field, stringMap::get));
+            CustomerRecord customerRecord = objectMapper.convertValue(customerRecordMap, CustomerRecord.class);
+
+            List<CustomFieldMapping> customFieldMappingList = customFieldMappingService.fetchCustomFieldMappingByAccountId(accountId);
+            Map<String, String> customFieldMap = new HashMap<>();
+            stringMap.forEach((key, value) -> {
+                if (!(customerRecordFields.contains(key))) {
+                    customFieldMap.put(key, value);
+                }
+            });
+            customerRecord.setCustomField(customFieldService.mapCustomFields(customerRecord, customFieldMap, customFieldMappingList));
+
+            System.out.println("++++++++++++");
+            System.out.println(customerRecord);
+            return customerRecord;
+        };
     }
 
-    @Bean
+//    @Bean
     @StepScope
     public ItemWriter<CustomerRecord> itemWriter() {
         RepositoryItemWriter<CustomerRecord> writer = new RepositoryItemWriter<>();
@@ -110,24 +165,38 @@ public class SpringBatchImportConfig {
         return writer;
     }
 
-    private LineMapper<Map<String, String>> lineMapper(Long accountId, String filePath) {
-//        List<String> customerRecordFieldNames = CustomerRecord.getFields();
-//        List<String> customFieldNames = customFieldMappingService.fetchCustomFieldNamesByAccountId(accountId);
-//        List<String> headers = Stream.concat(customerRecordFieldNames.stream(), customFieldNames.stream()).toList();
+    private LineMapper<StringMap> lineMapper(Long accountId, String filePath) {
+        List<String> customerRecordFieldNames = CustomerRecord.getFields();
+        List<String> customFieldNames = customFieldMappingService.fetchCustomFieldNamesByAccountId(accountId);
+
+        String[] headers = getHeaders(filePath);
+        verifyHeaders(headers, Stream.concat(customerRecordFieldNames.stream(), customFieldNames.stream()).toList());
 
         DelimitedLineTokenizer lineTokenizer = new DelimitedLineTokenizer();
         lineTokenizer.setDelimiter(",");
         lineTokenizer.setStrict(false);
-        lineTokenizer.setNames(getHeaders(filePath));
-//        lineTokenizer.setNames(headers.toArray(String[]::new));
+        lineTokenizer.setNames(headers);
+        // ++++++++++++
 
-        BeanWrapperFieldSetMapper<Map<String, String>> fieldSetMapper = new BeanWrapperFieldSetMapper<>();
-        fieldSetMapper.setTargetType((Class<? extends Map<String, String>>) Map.class);
+        BeanWrapperFieldSetMapper<StringMap> fieldSetMapper1 = new BeanWrapperFieldSetMapper<>();
+        fieldSetMapper1.setTargetType(StringMap.class);
 
-        DefaultLineMapper<Map<String, String>> defaultLineMapper = new DefaultLineMapper<>();
+        // ++++++++++++
+        BeanWrapperFieldSetMapper<CustomerRecord> fieldSetMapper2 = new BeanWrapperFieldSetMapper<>();
+        fieldSetMapper2.setTargetType(CustomerRecord.class);
+
+        DefaultLineMapper<StringMap> defaultLineMapper = new DefaultLineMapper<>();
         defaultLineMapper.setLineTokenizer(lineTokenizer);
-        defaultLineMapper.setFieldSetMapper(fieldSetMapper);
+        defaultLineMapper.setFieldSetMapper(fieldSetMapper1);
         return defaultLineMapper;
+    }
+
+    private void verifyHeaders(String[] headers, List<String> customerRecordFields) {
+        for (String header : headers) {
+            if (!(header.equals("accountId") || customerRecordFields.contains(header))) {
+                throw new RuntimeException("Unknown header '" + header + "'");
+            }
+        }
     }
 
     private String[] getHeaders(String filePath) {

@@ -30,7 +30,7 @@ public class CustomerRecord {
     private String city;
     private String state;
     private String country;
-    private Integer zipcode;
+    private String zipcode;
     @JsonIgnore
     @OneToOne(mappedBy = "customerRecord", cascade = CascadeType.ALL)
     private CustomField customField;
