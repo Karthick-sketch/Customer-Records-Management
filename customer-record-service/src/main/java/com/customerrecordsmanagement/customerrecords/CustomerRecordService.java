@@ -5,6 +5,7 @@ import com.customerrecordsmanagement.EntityNotException;
 import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMapping;
 import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
 import com.customerrecordsmanagement.customfields.CustomFieldService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -64,6 +67,23 @@ public class CustomerRecordService {
         customerRecord.setCustomField(customFieldService.createCustomField(customerRecordDTO));
         customerRecordDTO.setCustomerRecord(createCustomerRecord(customerRecord));
         return customerRecordDTO;
+    }
+
+    public CustomerRecord convertMapToCustomerRecord(Map<String, String> stringMap) {
+        List<String> customerRecordFields = CustomerRecord.getFields();
+        Map<String, String> customerRecordMap = customerRecordFields.stream()
+                .collect(Collectors.toMap(field -> field, stringMap::get));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        CustomerRecord customerRecord = objectMapper.convertValue(customerRecordMap, CustomerRecord.class);
+
+        List<CustomFieldMapping> customFieldMappingList = customFieldMappingService.fetchCustomFieldMappingByAccountId(customerRecord.getAccountId());
+        Map<String, String> customFieldMap = stringMap.entrySet().stream()
+                .filter(entry -> !(customerRecordFields.contains(entry.getKey())))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        customerRecord.setCustomField(customFieldService.mapCustomFields(customerRecord, customFieldMap, customFieldMappingList));
+
+        return customerRecord;
     }
 
     public int createAllCustomerRecords(long accountId, List<CustomerRecordDTO> customerRecordDTOs) {

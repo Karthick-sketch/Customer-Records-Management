@@ -66,25 +66,12 @@ public class FileUploadStatusService {
             CsvFileDetail csvFileDetail = csvFileDetailService.saveCsvFileDetail(accountId, file.getOriginalFilename(), filePath);
             FileUploadStatus fileUploadStatus = createNewFileUploadStatus(accountId, csvFileDetail.getFileName());
             fileUploadEventKafkaProducer.publishKafkaMessage(accountId, csvFileDetail.getId(), fileUploadStatus.getId());
-            logger.info(file.getOriginalFilename() + " file upload");
+            logger.info(file.getOriginalFilename() + " file uploaded");
             return new FileUploadStatusDTO(fileUploadStatus.getId());
         } catch (IOException e) {
             logger.severe(e.getMessage());
         }
         return null;
-    }
-
-    public void batchUploadCsvFile(MultipartFile file) {
-        if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
-            throw new BadRequestException("Only CSV files are allowed");
-        }
-        String filePath = getFilePath(file.getOriginalFilename(), true);
-        try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
-            fileOutputStream.write(file.getBytes());
-            logger.info(file.getOriginalFilename() + " file upload");
-        } catch (IOException e) {
-            logger.severe(e.getMessage());
-        }
     }
 
     public Resource exportCsvFile(long accountId) {

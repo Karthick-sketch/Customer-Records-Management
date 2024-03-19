@@ -79,7 +79,8 @@ public class SpringBatchExportConfig {
                 .build();
     }
 
-    @Bean(name = "exportTaskExecutor")
+//    @Bean(name = "exportTaskExecutor")
+    @Bean
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(8);
@@ -90,13 +91,13 @@ public class SpringBatchExportConfig {
         return executor;
     }
 
-//    @Bean
+//    @Bean(name = "exportItemProcessor")
     @StepScope
     public ItemProcessor<CustomerRecord, CustomerRecord> itemProcessor() {
         return customerRecord -> customerRecord;
     }
 
-    @Bean
+    @Bean(name = "exportItemWriter")
     @StepScope
     public FlatFileItemWriter<CustomerRecord> fileWriter(@Value("#{jobParameters[accountId]}") Long accountId, @Value("#{jobParameters[filePath]}") String filePath) {
         List<String> customerRecordFieldNames = CustomerRecord.getFields();
@@ -117,7 +118,7 @@ public class SpringBatchExportConfig {
         return writer;
     }
 
-    @Bean
+    @Bean(name = "exportItemReader")
     @StepScope
     public ItemStreamReader<CustomerRecord> dbReader(@Value("#{jobParameters[accountId]}") Long accountId) throws Exception {
         return itemStreamReader(accountId, customerRecordMapper);
