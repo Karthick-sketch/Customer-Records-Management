@@ -2,8 +2,6 @@ package com.customerrecordsmanagement.config;
 
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
@@ -19,7 +17,8 @@ import org.springframework.batch.item.ItemStreamReader;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.batch.item.file.FlatFileItemWriter;
-import org.springframework.batch.item.file.transform.BeanWrapperFieldExtractor;
+import org.springframework.batch.item.file.transform.DelimitedLineAggregator;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,21 +37,25 @@ import java.util.stream.Stream;
 
 @Configuration
 @EnableBatchProcessing
-@RequiredArgsConstructor
 public class SpringBatchExportConfig {
-    @NonNull
-    private DataSource dataSource;
-    @NonNull
-    private JobRepository jobRepository;
-    @NonNull
-    private PlatformTransactionManager transactionManager;
-    @NonNull
-    private CustomerRecordMapper customerRecordMapper;
-    @NonNull
-    private CustomFieldMappingService customFieldMappingService;
-
+    private final DataSource dataSource;
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final CustomerRecordMapper customerRecordMapper;
+    private final CustomFieldMappingService customFieldMappingService;
     private Long accountId;
     private String filePath;
+
+    public SpringBatchExportConfig(DataSource dataSource,
+            @Qualifier("batchExportJobRepository") JobRepository jobRepository,
+            @Qualifier("batchExportTransactionManager") PlatformTransactionManager transactionManager,
+            CustomerRecordMapper customerRecordMapper, CustomFieldMappingService customFieldMappingService) {
+        this.dataSource = dataSource;
+        this.jobRepository = jobRepository;
+        this.transactionManager = transactionManager;
+        this.customerRecordMapper = customerRecordMapper;
+        this.customFieldMappingService = customFieldMappingService;
+    }
 
     @BeforeStep
     public void beforeStep(StepExecution stepExecution) {
@@ -79,8 +82,7 @@ public class SpringBatchExportConfig {
                 .build();
     }
 
-//    @Bean(name = "exportTaskExecutor")
-    @Bean
+    @Bean(name = "exportTaskExecutor")
     public TaskExecutor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(8);
@@ -91,7 +93,7 @@ public class SpringBatchExportConfig {
         return executor;
     }
 
-//    @Bean(name = "exportItemProcessor")
+    @Bean(name = "exportItemProcessor")
     @StepScope
     public ItemProcessor<CustomerRecord, CustomerRecord> itemProcessor() {
         return customerRecord -> customerRecord;
@@ -99,7 +101,8 @@ public class SpringBatchExportConfig {
 
     @Bean(name = "exportItemWriter")
     @StepScope
-    public FlatFileItemWriter<CustomerRecord> fileWriter(@Value("#{jobParameters[accountId]}") Long accountId, @Value("#{jobParameters[filePath]}") String filePath) {
+    public FlatFileItemWriter<CustomerRecord> fileWriter(@Value("#{jobParameters[accountId]}") Long accountId,
+            @Value("#{jobParameters[filePath]}") String filePath) {
         List<String> customerRecordFieldNames = CustomerRecord.getFields();
         List<String> customFieldNames = customFieldMappingService.fetchCustomFieldNamesByAccountId(accountId);
         List<String> headers = Stream.concat(customerRecordFieldNames.stream(), customFieldNames.stream()).toList();
@@ -108,10 +111,12 @@ public class SpringBatchExportConfig {
         writer.setResource(new FileSystemResource(filePath));
         writer.setHeaderCallback(writer1 -> writer1.write(String.join(",", headers)));
 
-        BeanWrapperFieldExtractor<CustomerRecord> fieldExtractor = new BeanWrapperFieldExtractor<>();
-        fieldExtractor.setNames(headers.toArray(String[]::new));
+        CustomerRecordFieldExtractor fieldExtractor = new CustomerRecordFieldExtractor();
+        fieldExtractor.setFieldNames(headers.toArray(String[]::new));
+        fieldExtractor.setCustomFieldMappingList(customFieldMappingService.fetchCustomFieldMappingByAccountId(accountId));
 
-        CustomRecordDelimitedLineAggregator<CustomerRecord> lineAggregator = new CustomRecordDelimitedLineAggregator<>();
+        DelimitedLineAggregator<CustomerRecord> lineAggregator = new DelimitedLineAggregator<>();
+        lineAggregator.setQuoteCharacter("'");
         lineAggregator.setFieldExtractor(fieldExtractor);
 
         writer.setLineAggregator(lineAggregator);

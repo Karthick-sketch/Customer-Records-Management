@@ -1,4 +1,4 @@
-import csv, random, string
+import csv
 
 # Number of contacts to generate
 num_contacts = 1_00_000

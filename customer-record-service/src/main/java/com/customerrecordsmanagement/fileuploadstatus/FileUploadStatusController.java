@@ -19,17 +19,20 @@ import java.util.List;
 @RestController
 @RequestMapping("/upload-status/account")
 public class FileUploadStatusController {
-    private final FileUploadStatusService fileUploadStatusService;
-    private final JobLauncher jobLauncher;
+    private final JobLauncher exportJobLauncher;
     private final Job exportJob;
+    private final JobLauncher importJobLauncher;
     private final Job importJob;
+    private final FileUploadStatusService fileUploadStatusService;
 
-    public FileUploadStatusController(FileUploadStatusService fileUploadStatusService,
-            @Qualifier("batchJobLauncher") JobLauncher jobLauncher, @Qualifier("customerRecordExportJob") Job exportJob,
-            @Qualifier("customerRecordImportJob") Job importJob) {
+    public FileUploadStatusController(@Qualifier("batchExportJobLauncher") JobLauncher exportJobLauncher,
+            @Qualifier("customerRecordExportJob") Job exportJob,
+            @Qualifier("batchImportJobLauncher") JobLauncher importJobLauncher,
+            @Qualifier("customerRecordImportJob") Job importJob, FileUploadStatusService fileUploadStatusService) {
         this.fileUploadStatusService = fileUploadStatusService;
-        this.jobLauncher = jobLauncher;
+        this.exportJobLauncher = exportJobLauncher;
         this.exportJob = exportJob;
+        this.importJobLauncher = importJobLauncher;
         this.importJob = importJob;
     }
 
@@ -67,7 +70,7 @@ public class FileUploadStatusController {
                 .addString("filePath", file.getAbsolutePath())
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncher.run(exportJob, jobParameter);
+        JobExecution jobExecution = exportJobLauncher.run(exportJob, jobParameter);
         while (jobExecution.isRunning()) {
             System.out.println("......");
         }
@@ -90,7 +93,7 @@ public class FileUploadStatusController {
                 .addString("filePath", filePath)
                 .toJobParameters();
 
-        JobExecution jobExecution = jobLauncher.run(importJob, jobParameter);
+        JobExecution jobExecution = importJobLauncher.run(importJob, jobParameter);
         while (jobExecution.isRunning()) {
             System.out.println("......");
         }

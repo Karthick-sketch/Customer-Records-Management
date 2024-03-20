@@ -4,8 +4,6 @@ import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.CustomerRecordRepository;
 import com.customerrecordsmanagement.customerrecords.CustomerRecordService;
 import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
-import jakarta.annotation.Nonnull;
-import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;
@@ -22,6 +20,7 @@ import org.springframework.batch.item.data.RepositoryItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,21 +38,24 @@ import java.util.stream.Stream;
 
 @Configuration
 @EnableBatchProcessing
-@RequiredArgsConstructor
 public class SpringBatchImportConfig {
-    @Nonnull
-    private JobRepository jobRepository;
-    @Nonnull
-    private PlatformTransactionManager transactionManager;
-    @Nonnull
-    private CustomerRecordRepository customerRecordRepository;
-    @Nonnull
-    private CustomerRecordService customerRecordService;
-    @Nonnull
-    private CustomFieldMappingService customFieldMappingService;
-
+    private final JobRepository jobRepository;
+    private final PlatformTransactionManager transactionManager;
+    private final CustomerRecordRepository customerRecordRepository;
+    private final CustomerRecordService customerRecordService;
+    private final CustomFieldMappingService customFieldMappingService;
     private Long accountId;
     private String filePath;
+
+    public SpringBatchImportConfig(@Qualifier("batchImportJobRepository") JobRepository jobRepository,
+            PlatformTransactionManager transactionManager, CustomerRecordRepository customerRecordRepository,
+            CustomerRecordService customerRecordService, CustomFieldMappingService customFieldMappingService) {
+        this.jobRepository = jobRepository;
+        this.transactionManager = transactionManager;
+        this.customerRecordRepository = customerRecordRepository;
+        this.customerRecordService = customerRecordService;
+        this.customFieldMappingService = customFieldMappingService;
+    }
 
     @BeforeStep
     public void beforeStep(StepExecution stepExecution) {
@@ -89,7 +91,8 @@ public class SpringBatchImportConfig {
 
     @Bean(name = "importItemReader")
     @StepScope
-    public FlatFileItemReader<Map<String, String>> itemReader(@Value("#{jobParameters[accountId]}") Long accountId, @Value("#{jobParameters[filePath]}") String filePath) {
+    public FlatFileItemReader<Map<String, String>> itemReader(@Value("#{jobParameters[accountId]}") Long accountId,
+            @Value("#{jobParameters[filePath]}") String filePath) {
         FlatFileItemReader<Map<String, String>> reader = new FlatFileItemReader<>();
         reader.setResource(new FileSystemResource(filePath));
         reader.setLinesToSkip(1);
@@ -100,13 +103,17 @@ public class SpringBatchImportConfig {
         String[] headers = getHeaders(filePath);
         verifyHeaders(headers, Stream.concat(customerRecordFieldNames.stream(), customFieldNames.stream()).toList());
 
-        reader.setLineMapper(new DefaultLineMapper<>() {{
-            setLineTokenizer(new DelimitedLineTokenizer() {{
-                setNames(headers);
-            }});
-            setFieldSetMapper(fieldSet -> Arrays.stream(headers)
+        reader.setLineMapper(new DefaultLineMapper<>() {
+            {
+                setLineTokenizer(new DelimitedLineTokenizer() {
+                    {
+                        setNames(headers);
+                    }
+                });
+                setFieldSetMapper(fieldSet -> Arrays.stream(headers)
                         .collect(Collectors.toMap(header -> header, fieldSet::readString)));
-        }});
+            }
+        });
         return reader;
     }
 

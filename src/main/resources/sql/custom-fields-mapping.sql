@@ -1,0 +1,10 @@
+INSERT IGNORE INTO custom_fields_mapping(account_id, field_name, custom_field_name, data_type) VALUES(1, "field1", "cf1", "text");
+INSERT IGNORE INTO custom_fields_mapping(account_id, field_name, custom_field_name, data_type) VALUES(1, "field2", "cf2", "text");
+INSERT IGNORE INTO custom_fields_mapping(account_id, field_name, custom_field_name, data_type) VALUES(1, "field3", "cf3", "text");
+INSERT IGNORE INTO custom_fields_mapping(account_id, field_name, custom_field_name, data_type) VALUES(1, "field4", "cf4", "text");
+INSERT IGNORE INTO custom_fields_mapping(account_id, field_name, custom_field_name, data_type) VALUES(1, "field5", "cf5", "text");
+INSERT IGNORE INTO custom_fields_mapping(account_id, field_name, custom_field_name, data_type) VALUES(1, "field6", "cf6", "text");
+INSERT IGNORE INTO custom_fields_mapping(account_id, field_name, custom_field_name, data_type) VALUES(1, "field7", "cf7", "text");
+INSERT IGNORE INTO custom_fields_mapping(account_id, field_name, custom_field_name, data_type) VALUES(1, "field8", "cf8", "text");
+INSERT IGNORE INTO custom_fields_mapping(account_id, field_name, custom_field_name, data_type) VALUES(1, "field9", "cf9", "text");
+INSERT IGNORE INTO custom_fields_mapping(account_id, field_name, custom_field_name, data_type) VALUES(1, "field10", "cf10", "text");
