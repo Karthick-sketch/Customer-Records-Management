@@ -1,6 +1,5 @@
 package com.customerrecordsmanagement.customfields;
 
-import com.customerrecordsmanagement.EntityNotException;
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.CustomerRecordDTO;
 import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMapping;
@@ -31,7 +30,10 @@ public class CustomFieldService {
 
     public CustomField mapCustomFields(CustomerRecord customerRecord, Map<String, String> customFieldMap, List<CustomFieldMapping> customFieldMappings) {
         CustomField customField = new CustomField(customerRecord);
-        customFieldMap.forEach((key, value) -> customField.setField(findColumnNameByCustomFieldName(key, customFieldMappings), value));
+        customFieldMap.forEach((key, value) -> {
+            String field = customFieldMappingService.findColumnNameByCustomFieldName(key, customFieldMappings);
+            customField.setField(field, value);
+        });
         return customField;
     }
 
@@ -42,15 +44,6 @@ public class CustomFieldService {
             return null;
         }
         return convertCustomFieldsToMap(customField, customFieldMappings);
-    }
-
-    private String findColumnNameByCustomFieldName(String columnName, List<CustomFieldMapping> customFieldMappings) {
-        for (CustomFieldMapping customFieldMapping : customFieldMappings) {
-            if (columnName.equals(customFieldMapping.getCustomFieldName())) {
-                return customFieldMapping.getFieldName();
-            }
-        }
-        throw new EntityNotException("There is no custom field called " + columnName);
     }
 
     private Map<String, String> convertCustomFieldsToMap(CustomField customField, List<CustomFieldMapping> customFieldMapping) {

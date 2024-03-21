@@ -1,7 +1,7 @@
 package com.customerrecordsmanagement.contactlist;
 
-import com.customerrecordsmanagement.BadRequestException;
-import com.customerrecordsmanagement.EntityNotException;
+import com.customerrecordsmanagement.DuplicateEntryException;
+import com.customerrecordsmanagement.EntityNotFoundException;
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.CustomerRecordService;
 import lombok.AllArgsConstructor;
@@ -26,7 +26,7 @@ public class ContactListService {
     public ContactList fetchContactListByIdAndAccountId(long id, long accountId) {
         Optional<ContactList> contactList = contactListRepository.findByIdAndAccountId(id, accountId);
         if (contactList.isEmpty()) {
-            throw new EntityNotException("There is no list with ID of " + id);
+            throw new EntityNotFoundException("There is no list with ID of " + id);
         }
         return contactList.get();
     }
@@ -44,7 +44,7 @@ public class ContactListService {
         try {
             return contactListRepository.save(contactList);
         } catch (DataIntegrityViolationException e) {
-            throw new BadRequestException("The contact list " + contactList.getListName() + " is already present");
+            throw new DuplicateEntryException("The contact list " + contactList.getListName() + " is already present");
         }
     }
 
@@ -52,7 +52,7 @@ public class ContactListService {
         try {
             contactListMappingRepository.save(contactListMapping);
         } catch (DataIntegrityViolationException e) {
-            throw new BadRequestException("The customer record " + contactListMapping.getCustomerRecord().getEmail() + " is already present");
+            throw new DuplicateEntryException("The customer record " + contactListMapping.getCustomerRecord().getEmail() + " is already present");
         }
     }
 

@@ -1,14 +1,11 @@
 package com.customerrecordsmanagement.fileuploadstatus;
 
 import com.customerrecordsmanagement.BadRequestException;
-import com.customerrecordsmanagement.EntityNotException;
+import com.customerrecordsmanagement.EntityNotFoundException;
 import com.customerrecordsmanagement.csvfiledetail.CsvFileDetail;
 import com.customerrecordsmanagement.csvfiledetail.CsvFileDetailService;
-import com.customerrecordsmanagement.fileprocess.FileExportProcess;
 import com.customerrecordsmanagement.fileprocess.FileUploadEventKafkaProducer;
 import lombok.AllArgsConstructor;
-import org.springframework.core.io.PathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,7 +21,6 @@ public class FileUploadStatusService {
     private FileUploadStatusRepository fileUploadStatusRepository;
     private CsvFileDetailService csvFileDetailService;
     private FileUploadEventKafkaProducer fileUploadEventKafkaProducer;
-    private FileExportProcess fileExportProcess;
 
     private final Logger logger = Logger.getLogger(FileUploadStatusService.class.getName());
 
@@ -35,7 +31,7 @@ public class FileUploadStatusService {
     public FileUploadStatus fetchFileUploadStatusByIdAndAccountId(long id, long accountId) {
         Optional<FileUploadStatus> fileUploadStatus = fileUploadStatusRepository.findByIdAndAccountId(id, accountId);
         if (fileUploadStatus.isEmpty()) {
-            throw new EntityNotException("The uploaded file status with the Id of " + id + " is not found");
+            throw new EntityNotFoundException("The uploaded file status with the Id of " + id + " is not found");
         }
         return fileUploadStatus.get();
     }
@@ -72,13 +68,6 @@ public class FileUploadStatusService {
             logger.severe(e.getMessage());
         }
         return null;
-    }
-
-    public Resource exportCsvFile(long accountId) {
-        String fileName = accountId + "-customer-records-" + LocalDateTime.now() + ".csv";
-        String filePath = getFilePath(fileName, false);
-        fileExportProcess.writeCustomerRecordDataToCsvFile(accountId, filePath);
-        return new PathResource(filePath);
     }
 
     public String getFilePath(String fileName, boolean isUpload) {

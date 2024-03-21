@@ -1,6 +1,8 @@
 package com.customerrecordsmanagement.customfields.customfieldmapping;
 
 import com.customerrecordsmanagement.BadRequestException;
+import com.customerrecordsmanagement.DuplicateEntryException;
+import com.customerrecordsmanagement.EntityNotFoundException;
 import com.customerrecordsmanagement.customfields.CustomField;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -20,7 +22,7 @@ public class CustomFieldMappingService {
         try {
             return customFieldMappingRepository.save(customFieldMapping);
         } catch (DataIntegrityViolationException e) {
-            throw new BadRequestException("The custom field " + customFieldMapping.getCustomFieldName() + " is already present");
+            throw new DuplicateEntryException("The custom field " + customFieldMapping.getCustomFieldName() + " is already present");
         }
     }
 
@@ -48,6 +50,15 @@ public class CustomFieldMappingService {
 
     public List<String> fetchCustomFieldNamesByAccountId(long accountId) {
         return customFieldMappingRepository.findCustomFieldNamesByAccountId(accountId);
+    }
+
+    public String findColumnNameByCustomFieldName(String columnName, List<CustomFieldMapping> customFieldMappings) {
+        for (CustomFieldMapping customFieldMapping : customFieldMappings) {
+            if (columnName.equals(customFieldMapping.getCustomFieldName())) {
+                return customFieldMapping.getFieldName();
+            }
+        }
+        throw new EntityNotFoundException("There is no custom field called '" + columnName + "'");
     }
 
     private CustomFieldMapping convertToCustomFieldMapping(CustomFieldMappingDTO customFieldMappingDTO) {

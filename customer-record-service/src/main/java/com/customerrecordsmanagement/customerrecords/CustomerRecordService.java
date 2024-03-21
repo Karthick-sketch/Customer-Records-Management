@@ -1,13 +1,15 @@
 package com.customerrecordsmanagement.customerrecords;
 
-import com.customerrecordsmanagement.BadRequestException;
-import com.customerrecordsmanagement.EntityNotException;
+import com.customerrecordsmanagement.DuplicateEntryException;
+import com.customerrecordsmanagement.EntityNotFoundException;
+import com.customerrecordsmanagement.customfields.CustomField;
 import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMapping;
 import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
 import com.customerrecordsmanagement.customfields.CustomFieldService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -40,7 +42,7 @@ public class CustomerRecordService {
     public CustomerRecord fetchCustomerRecordByIdAndAccountId(long id, long accountId) {
         Optional<CustomerRecord> customerRecord = customerRecordRepository.findByIdAndAccountId(id, accountId);
         if (customerRecord.isEmpty()) {
-            throw new EntityNotException("There is no customer record with the Id of " + id);
+            throw new EntityNotFoundException("There is no customer record with the Id of " + id);
         }
         return customerRecord.get();
     }
@@ -57,7 +59,7 @@ public class CustomerRecordService {
         try {
             return customerRecordRepository.save(customerRecord);
         } catch (DataIntegrityViolationException e) {
-            throw new BadRequestException("A contact with the this " + customerRecord.getEmail() + " email is already present");
+            throw new DuplicateEntryException("A contact with the this " + customerRecord.getEmail() + " email is already present");
         }
     }
 
@@ -67,6 +69,34 @@ public class CustomerRecordService {
         customerRecord.setCustomField(customFieldService.createCustomField(customerRecordDTO));
         customerRecordDTO.setCustomerRecord(createCustomerRecord(customerRecord));
         return customerRecordDTO;
+    }
+
+    public CustomerRecordDTO updateCustomerRecord(long id, long accountId, Map<String, String> customerRecordUpdate) {
+        CustomerRecord customerRecord = fetchCustomerRecordByIdAndAccountId(id, accountId);
+        BeanWrapperImpl customerRecordBeanWrapper = new BeanWrapperImpl(customerRecord);
+        BeanWrapperImpl customFieldBeanWrapper = new BeanWrapperImpl(customerRecord.getCustomField());
+
+        List<String> customerRecordFieldNames = CustomerRecord.getFields();
+        List<CustomFieldMapping> customFieldMappingList = customFieldMappingService.fetchCustomFieldMappingByAccountId(accountId);
+        customerRecordUpdate.forEach((key, value) -> {
+            if (!key.equals("accountId") && customerRecordFieldNames.contains(key)) {
+                customerRecordBeanWrapper.setPropertyValue(key, value);
+            } else {
+                String fieldName = customFieldMappingService.findColumnNameByCustomFieldName(key, customFieldMappingList);
+                customFieldBeanWrapper.setPropertyValue(fieldName, value);
+            }
+        });
+
+        CustomerRecord updatedCustomerRecord = (CustomerRecord) customerRecordBeanWrapper.getWrappedInstance();
+        CustomField updatedCustomField = (CustomField) customFieldBeanWrapper.getWrappedInstance();
+        updatedCustomerRecord.setCustomField(updatedCustomField);
+
+        return convertCustomerRecordToCustomerRecordDTO(customerRecordRepository.save(updatedCustomerRecord));
+    }
+
+    public void deleteCustomerRecordById(long id, long accountId) {
+        CustomerRecord customerRecord = fetchCustomerRecordByIdAndAccountId(id, accountId);
+        customerRecordRepository.delete(customerRecord);
     }
 
     public CustomerRecord convertMapToCustomerRecord(Map<String, String> stringMap) {
@@ -105,7 +135,7 @@ public class CustomerRecordService {
         for (CustomerRecord customerRecord : customerRecords) {
             try {
                 createCustomerRecord(customerRecord);
-            } catch (BadRequestException e) {
+            } catch (DuplicateEntryException e) {
                 duplicateRecords++;
             }
         }

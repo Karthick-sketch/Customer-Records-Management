@@ -1,6 +1,6 @@
 package com.customerrecordsmanagement.csvfiledetail;
 
-import com.customerrecordsmanagement.EntityNotException;
+import com.customerrecordsmanagement.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,7 @@ public class CsvFileDetailService {
     public CsvFileDetail fetchCsvFileDetailById(long id) {
         Optional<CsvFileDetail> csvFileDetail = csvFileDetailRepository.findById(id);
         if (csvFileDetail.isEmpty()) {
-            throw new EntityNotException("file not found");
+            throw new EntityNotFoundException("file not found");
         }
         return csvFileDetail.get();
     }

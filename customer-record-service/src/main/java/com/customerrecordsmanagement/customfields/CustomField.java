@@ -1,6 +1,6 @@
 package com.customerrecordsmanagement.customfields;
 
-import com.customerrecordsmanagement.EntityNotException;
+import com.customerrecordsmanagement.EntityNotFoundException;
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -82,7 +82,7 @@ public class CustomField {
 
     private void throwIfFieldIsNull(Field field, String fieldName) {
         if (field == null) {
-            throw new EntityNotException("There is no field called " + fieldName + " in the CustomField class.");
+            throw new EntityNotFoundException("There is no field called " + fieldName + " in the CustomField class.");
         }
     }
 }

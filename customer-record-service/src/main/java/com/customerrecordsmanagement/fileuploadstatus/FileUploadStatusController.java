@@ -46,15 +46,6 @@ public class FileUploadStatusController {
         return new ResponseEntity<>(fileUploadStatusService.fetchFileUploadStatusByIdAndAccountId(id, accountId), HttpStatus.OK);
     }
 
-    @GetMapping("{accountId}/export-csv")
-    public ResponseEntity<Resource> exportCsvFile(@PathVariable long accountId) {
-        Resource resource = fileUploadStatusService.exportCsvFile(accountId);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + resource.getFilename())
-                .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                .body(resource);
-    }
-
     @PostMapping("/{accountId}/upload-csv")
     public ResponseEntity<FileUploadStatusDTO> uploadCsvFile(@PathVariable long accountId, @RequestPart("file") MultipartFile file) {
         return new ResponseEntity<>(fileUploadStatusService.uploadCsvFile(accountId, file), HttpStatus.OK);
