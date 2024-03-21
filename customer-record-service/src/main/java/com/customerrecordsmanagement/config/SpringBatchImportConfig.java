@@ -48,8 +48,9 @@ public class SpringBatchImportConfig {
     private String filePath;
 
     public SpringBatchImportConfig(@Qualifier("batchImportJobRepository") JobRepository jobRepository,
-            PlatformTransactionManager transactionManager, CustomerRecordRepository customerRecordRepository,
-            CustomerRecordService customerRecordService, CustomFieldMappingService customFieldMappingService) {
+            @Qualifier("transactionManager") PlatformTransactionManager transactionManager,
+            CustomerRecordRepository customerRecordRepository, CustomerRecordService customerRecordService,
+            CustomFieldMappingService customFieldMappingService) {
         this.jobRepository = jobRepository;
         this.transactionManager = transactionManager;
         this.customerRecordRepository = customerRecordRepository;
@@ -119,7 +120,8 @@ public class SpringBatchImportConfig {
 
     @Bean(name = "importItemProcessor")
     @StepScope
-    public ItemProcessor<Map<String, String>, CustomerRecord> itemProcessor(@Value("#{jobParameters[accountId]}") Long accountId) {
+    public ItemProcessor<Map<String, String>, CustomerRecord> itemProcessor(
+            @Value("#{jobParameters[accountId]}") Long accountId) {
         return stringMap -> {
             stringMap.put("accountId", accountId.toString());
             return customerRecordService.convertMapToCustomerRecord(stringMap);

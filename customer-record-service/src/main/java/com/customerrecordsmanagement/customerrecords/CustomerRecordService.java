@@ -61,7 +61,7 @@ public class CustomerRecordService {
         }
     }
 
-    @Transactional
+    @Transactional("transactionManager")
     public CustomerRecordDTO createNewCustomerRecord(CustomerRecordDTO customerRecordDTO) {
         CustomerRecord customerRecord = customerRecordDTO.getCustomerRecord();
         customerRecord.setCustomField(customFieldService.createCustomField(customerRecordDTO));

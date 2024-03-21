@@ -57,7 +57,7 @@ public class JobLauncherConfig {
         return factory.getObject();
     }
 
-    @Bean
+    @Bean(name = "transactionManager")
     public PlatformTransactionManager transactionManager() {
         return new JpaTransactionManager();
     }
