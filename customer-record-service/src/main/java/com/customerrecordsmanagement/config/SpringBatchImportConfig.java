@@ -122,10 +122,7 @@ public class SpringBatchImportConfig {
     @StepScope
     public ItemProcessor<Map<String, String>, CustomerRecord> itemProcessor(
             @Value("#{jobParameters[accountId]}") Long accountId) {
-        return stringMap -> {
-            stringMap.put("accountId", accountId.toString());
-            return customerRecordService.convertMapToCustomerRecord(stringMap);
-        };
+        return stringMap -> customerRecordService.convertMapToCustomerRecord(accountId, stringMap);
     }
 
     @Bean(name = "importItemWriter")

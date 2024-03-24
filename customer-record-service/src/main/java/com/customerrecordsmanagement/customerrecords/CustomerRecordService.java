@@ -15,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +28,39 @@ public class CustomerRecordService {
     private CustomerRecordRepository customerRecordRepository;
     private CustomFieldService customFieldService;
     private CustomFieldMappingService customFieldMappingService;
+
+    public String generateBase64Code(long accountId) {
+        Base64.Encoder encoder = Base64.getEncoder();
+        String accountIdStr = Long.toString(accountId);
+        return encoder.encodeToString(accountIdStr.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public long decodeBase64Code(String base64Code) {
+        Base64.Decoder decoder = Base64.getDecoder();
+        String decodedAccountId = new String(decoder.decode(base64Code));
+        return Long.parseLong(decodedAccountId);
+    }
+
+    public CustomerRecordDTO createCustomerRecordFromMap(String base64, Map<String, String> customerRecordMap) {
+        CustomerRecord customerRecord = convertMapToCustomerRecord(decodeBase64Code(base64), customerRecordMap);
+        return convertCustomerRecordToCustomerRecordDTO(createCustomerRecord(customerRecord));
+    }
+
+    public CustomerRecord convertMapToCustomerRecord(long accountId, Map<String, String> stringMap) {
+        List<String> customerRecordFields = CustomerRecord.getFields();
+        List<CustomFieldMapping> customFieldMappingList = customFieldMappingService.fetchCustomFieldMappingByAccountId(accountId);
+        Map<String, String> customerRecordMap = customerRecordFields.stream()
+                .filter(field -> stringMap.get(field) != null)
+                .collect(Collectors.toMap(field -> field, stringMap::get));
+        Map<String, String> customFieldMap = stringMap.entrySet().stream()
+                .filter(entry -> !(customerRecordFields.contains(entry.getKey())))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        CustomerRecord customerRecord = mapToCustomerRecord(customerRecordMap);
+        customerRecord.setAccountId(accountId);
+        customerRecord.setCustomField(customFieldService.mapCustomFields(customerRecord, customFieldMap, customFieldMappingList));
+        return customerRecord;
+    }
 
     public List<CustomerRecordDTO> fetchCustomerRecords(long accountId, int pageNumber, int pageSize) {
         return customerRecordRepository.findByAccountId(accountId, PageRequest.of(pageNumber, pageSize)).stream()
@@ -93,23 +128,6 @@ public class CustomerRecordService {
         customerRecordRepository.delete(customerRecord);
     }
 
-    public CustomerRecord convertMapToCustomerRecord(Map<String, String> stringMap) {
-        List<String> customerRecordFields = CustomerRecord.getFields();
-        Map<String, String> customerRecordMap = customerRecordFields.stream()
-                .collect(Collectors.toMap(field -> field, stringMap::get));
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        CustomerRecord customerRecord = objectMapper.convertValue(customerRecordMap, CustomerRecord.class);
-
-        List<CustomFieldMapping> customFieldMappingList = customFieldMappingService.fetchCustomFieldMappingByAccountId(customerRecord.getAccountId());
-        Map<String, String> customFieldMap = stringMap.entrySet().stream()
-                .filter(entry -> !(customerRecordFields.contains(entry.getKey())))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        customerRecord.setCustomField(customFieldService.mapCustomFields(customerRecord, customFieldMap, customFieldMappingList));
-
-        return customerRecord;
-    }
-
     public int createAllCustomerRecords(long accountId, List<CustomerRecordDTO> customerRecordDTOs) {
         List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(accountId);
         List<CustomerRecord> customerRecords = customerRecordDTOs.stream()
@@ -140,5 +158,10 @@ public class CustomerRecordService {
         CustomerRecord customerRecord = customerRecordDTO.getCustomerRecord();
         customerRecord.setCustomField(customFieldService.mapCustomFields(customerRecord, customerRecordDTO.getCustomFields(), customFieldMappings));
         return customerRecord;
+    }
+
+    private CustomerRecord mapToCustomerRecord(Map<String, String> customerRecordMap) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.convertValue(customerRecordMap, CustomerRecord.class);
     }
 }

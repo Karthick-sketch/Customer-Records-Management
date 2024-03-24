@@ -14,6 +14,11 @@ import java.util.Map;
 public class CustomerRecordController {
     private CustomerRecordService customerRecordService;
 
+    @PostMapping("/authorization/generate/account/{accountId}")
+    public ResponseEntity<String> generateAuthCode(@PathVariable long accountId) {
+        return new ResponseEntity<>(customerRecordService.generateBase64Code(accountId), HttpStatus.CREATED);
+    }
+
     @GetMapping("/account/{accountId}")
     public ResponseEntity<List<CustomerRecordDTO>> getCustomerRecordsWithPagination(@PathVariable long accountId, @RequestParam int pageNumber, int pageSize) {
         return new ResponseEntity<>(customerRecordService.fetchCustomerRecords(accountId, pageNumber-1, pageSize), HttpStatus.OK);
@@ -24,9 +29,14 @@ public class CustomerRecordController {
         return new ResponseEntity<>(customerRecordService.fetchCustomerRecordAndCustomFieldsByIdAndAccountId(id, accountId), HttpStatus.OK);
     }
 
-    @PostMapping
+    @PostMapping("/new")
     public ResponseEntity<CustomerRecordDTO> createCustomerRecord(@RequestBody CustomerRecordDTO customerRecordDTO) {
         return new ResponseEntity<>(customerRecordService.createNewCustomerRecord(customerRecordDTO), HttpStatus.CREATED);
+    }
+
+    @PostMapping
+    public ResponseEntity<CustomerRecordDTO> createCustomerRecord(@RequestHeader("Authorization") String base64Code, @RequestBody Map<String, String> customerRecordMap) {
+        return new ResponseEntity<>(customerRecordService.createCustomerRecordFromMap(base64Code, customerRecordMap), HttpStatus.CREATED);
     }
 
     @PatchMapping("/account/{accountId}/id/{id}")
