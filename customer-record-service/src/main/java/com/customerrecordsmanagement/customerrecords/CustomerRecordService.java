@@ -27,15 +27,9 @@ public class CustomerRecordService {
     private CustomFieldService customFieldService;
     private CustomFieldMappingService customFieldMappingService;
 
-    public List<CustomerRecordDTO> fetchCustomerRecordsByAccountId(long accountId) {
-        return customerRecordRepository.findByAccountId(accountId).stream()
-                .map(customerRecord -> new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord)))
-                .toList();
-    }
-
     public List<CustomerRecordDTO> fetchCustomerRecords(long accountId, int pageNumber, int pageSize) {
         return customerRecordRepository.findByAccountId(accountId, PageRequest.of(pageNumber, pageSize)).stream()
-                .map(customerRecord -> new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord)))
+                .map(customerRecord -> new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord.getCustomField())))
                 .toList();
     }
 
@@ -52,7 +46,7 @@ public class CustomerRecordService {
     }
 
     public CustomerRecordDTO convertCustomerRecordToCustomerRecordDTO(CustomerRecord customerRecord) {
-        return new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord));
+        return new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord.getCustomField()));
     }
 
     public CustomerRecord createCustomerRecord(@NonNull CustomerRecord customerRecord) {
@@ -66,7 +60,7 @@ public class CustomerRecordService {
     @Transactional("transactionManager")
     public CustomerRecordDTO createNewCustomerRecord(CustomerRecordDTO customerRecordDTO) {
         CustomerRecord customerRecord = customerRecordDTO.getCustomerRecord();
-        customerRecord.setCustomField(customFieldService.createCustomField(customerRecordDTO));
+        customerRecord.setCustomField(customFieldService.createCustomFieldByCustomRecordDTO(customerRecordDTO));
         customerRecordDTO.setCustomerRecord(createCustomerRecord(customerRecord));
         return customerRecordDTO;
     }

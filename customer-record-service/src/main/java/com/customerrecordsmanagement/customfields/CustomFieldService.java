@@ -18,14 +18,14 @@ public class CustomFieldService {
     private CustomFieldRepository customFieldRepository;
     private CustomFieldMappingService customFieldMappingService;
 
-    public CustomField createCustomField(@NonNull CustomField customField) {
+    public CustomField createCustomFieldByCustomField(@NonNull CustomField customField) {
         return customFieldRepository.save(customField);
     }
 
-    public CustomField createCustomField(CustomerRecordDTO customerRecordDTO) {
+    public CustomField createCustomFieldByCustomRecordDTO(CustomerRecordDTO customerRecordDTO) {
         CustomerRecord customerRecord = customerRecordDTO.getCustomerRecord();
         List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(customerRecord.getAccountId());
-        return createCustomField(mapCustomFields(customerRecord, customerRecordDTO.getCustomFields(), customFieldMappings));
+        return createCustomFieldByCustomField(mapCustomFields(customerRecord, customerRecordDTO.getCustomFields(), customFieldMappings));
     }
 
     public CustomField mapCustomFields(CustomerRecord customerRecord, Map<String, String> customFieldMap, List<CustomFieldMapping> customFieldMappings) {
@@ -37,10 +37,9 @@ public class CustomFieldService {
         return customField;
     }
 
-    public Map<String, String> reverseMapCustomFields(CustomerRecord customerRecord) {
-        List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(customerRecord.getAccountId());
-        CustomField customField = customerRecord.getCustomField();
-        if (customFieldMappings.isEmpty() || customField == null) {
+    public Map<String, String> reverseMapCustomFields(@NonNull CustomField customField) {
+        List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(customField.getAccountId());
+        if (customFieldMappings.isEmpty()) {
             return null;
         }
         return convertCustomFieldsToMap(customField, customFieldMappings);
