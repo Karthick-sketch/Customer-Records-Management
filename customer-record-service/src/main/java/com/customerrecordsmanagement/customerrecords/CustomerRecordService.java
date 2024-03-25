@@ -28,17 +28,18 @@ public class CustomerRecordService {
     private CustomerRecordRepository customerRecordRepository;
     private CustomFieldService customFieldService;
     private CustomFieldMappingService customFieldMappingService;
+    private ObjectMapper objectMapper;
 
     public String generateBase64Code(long accountId) {
         Base64.Encoder encoder = Base64.getEncoder();
-        String accountIdStr = Long.toString(accountId);
+        String accountIdStr = "accountId=" + accountId;
         return encoder.encodeToString(accountIdStr.getBytes(StandardCharsets.UTF_8));
     }
 
     public long decodeBase64Code(String base64Code) {
         Base64.Decoder decoder = Base64.getDecoder();
         String decodedAccountId = new String(decoder.decode(base64Code));
-        return Long.parseLong(decodedAccountId);
+        return Long.parseLong(decodedAccountId.substring(decodedAccountId.indexOf("=")));
     }
 
     public CustomerRecordDTO createCustomerRecordFromMap(String base64, Map<String, String> customerRecordMap) {
@@ -68,6 +69,7 @@ public class CustomerRecordService {
                 .toList();
     }
 
+    // added unit test
     public CustomerRecord fetchCustomerRecordByIdAndAccountId(long id, long accountId) {
         Optional<CustomerRecord> customerRecord = customerRecordRepository.findByIdAndAccountId(id, accountId);
         if (customerRecord.isEmpty()) {
@@ -84,6 +86,7 @@ public class CustomerRecordService {
         return new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord.getCustomField()));
     }
 
+    // added unit test
     public CustomerRecord createCustomerRecord(@NonNull CustomerRecord customerRecord) {
         try {
             return customerRecordRepository.save(customerRecord);
@@ -92,12 +95,13 @@ public class CustomerRecordService {
         }
     }
 
+    // added unit test
     @Transactional("transactionManager")
-    public CustomerRecordDTO createNewCustomerRecord(CustomerRecordDTO customerRecordDTO) {
+    public CustomerRecordDTO createCustomerRecordByDTO(CustomerRecordDTO customerRecordDTO) {
         CustomerRecord customerRecord = customerRecordDTO.getCustomerRecord();
         customerRecord.setCustomField(customFieldService.createCustomFieldByCustomRecordDTO(customerRecordDTO));
-        customerRecordDTO.setCustomerRecord(createCustomerRecord(customerRecord));
-        return customerRecordDTO;
+        CustomerRecord createdCustomerRecord = createCustomerRecord(customerRecord);
+        return new CustomerRecordDTO(createdCustomerRecord, customFieldService.reverseMapCustomFields(createdCustomerRecord.getCustomField()));
     }
 
     public CustomerRecordDTO updateCustomerRecord(long id, long accountId, Map<String, String> customerRecordUpdate) {
@@ -111,7 +115,7 @@ public class CustomerRecordService {
             if (!key.equals("accountId") && customerRecordFieldNames.contains(key)) {
                 customerRecordBeanWrapper.setPropertyValue(key, value);
             } else {
-                String fieldName = customFieldMappingService.findColumnNameByCustomFieldName(key, customFieldMappingList);
+                String fieldName = CustomFieldMappingService.findColumnNameByCustomFieldName(key, customFieldMappingList);
                 customFieldBeanWrapper.setPropertyValue(fieldName, value);
             }
         });
@@ -123,6 +127,7 @@ public class CustomerRecordService {
         return convertCustomerRecordToCustomerRecordDTO(customerRecordRepository.save(updatedCustomerRecord));
     }
 
+    // added unit test
     public void deleteCustomerRecordById(long id, long accountId) {
         CustomerRecord customerRecord = fetchCustomerRecordByIdAndAccountId(id, accountId);
         customerRecordRepository.delete(customerRecord);
@@ -161,7 +166,6 @@ public class CustomerRecordService {
     }
 
     private CustomerRecord mapToCustomerRecord(Map<String, String> customerRecordMap) {
-        ObjectMapper objectMapper = new ObjectMapper();
         return objectMapper.convertValue(customerRecordMap, CustomerRecord.class);
     }
 }

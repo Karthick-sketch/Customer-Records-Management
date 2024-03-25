@@ -3,6 +3,7 @@ package com.customerrecordsmanagement;
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customfields.CustomField;
 import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMapping;
+import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,10 @@ public class MockObjects {
         return customField;
     }
 
+    public static List<CustomFieldMapping> getCustomFieldMappingList() {
+        return IntStream.range(1, 11).mapToObj(MockObjects::getCustomFieldMapping).toList();
+    }
+
     public static CustomFieldMapping getCustomFieldMapping(long id) {
         CustomFieldMapping customFieldMapping = new CustomFieldMapping();
         customFieldMapping.setId(id);
@@ -64,7 +69,31 @@ public class MockObjects {
         return customFieldMapping;
     }
 
-    public static List<CustomFieldMapping> getCustomFieldMappingList() {
-        return IntStream.range(1, 10).mapToObj(MockObjects::getCustomFieldMapping).toList();
+    public static List<CustomFieldMappingDTO> getCustomFieldMappingDtoList() {
+        return IntStream.range(1, 11).mapToObj(MockObjects::getCustomFieldMappingDTO).toList();
+    }
+
+    public static CustomFieldMappingDTO getCustomFieldMappingDTO(long id) {
+        CustomFieldMappingDTO customFieldMappingDTO = new CustomFieldMappingDTO();
+        customFieldMappingDTO.setId(id);
+        customFieldMappingDTO.setAccountId(1L);
+        customFieldMappingDTO.setCustomFieldName("cf" + id);
+        customFieldMappingDTO.setDataType("text");
+        return customFieldMappingDTO;
+    }
+
+    public static CustomerRecord getUpdatedCustomerRecord() {
+        CustomerRecord customerRecord = getCustomerRecord();
+        customerRecord.setEmail("jbutt@hotmail.com");
+        customerRecord.getCustomField().setField1("custom-field-value");
+        return customerRecord;
+    }
+
+    public static Map<String, String> getValidCustomerRecordFieldsForUpdate() {
+        return Map.of("email", "jbutt@hotmail.com", "cf1", "custom-field-value");
+    }
+
+    public static Map<String, String> getInvalidCustomerRecordFieldsForUpdate() {
+        return Map.of("amount", "100.0 INR");
     }
 }

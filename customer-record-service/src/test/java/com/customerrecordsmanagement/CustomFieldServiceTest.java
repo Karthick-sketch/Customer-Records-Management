@@ -47,8 +47,18 @@ public class CustomFieldServiceTest {
         Mockito.when(customFieldMappingService.fetchCustomFieldMappingByAccountId(mockCustomerRecord.getAccountId()))
                 .thenReturn(mockCustomFieldMappingList);
 
-        Assertions.assertEquals(mockCustomField, customFieldService.createCustomFieldByCustomField(mockCustomField));
+        CustomField validCustomField = customFieldService.createCustomFieldByCustomRecordDTO(mockCustomerRecordDTO);
+        Assertions.assertEquals(mockCustomField, validCustomField);
         Mockito.verify(customFieldRepository, Mockito.times(1)).save(mockCustomField);
+    }
+
+    @Test
+    public void testMapCustomFields() {
+        CustomerRecord mockCustomerRecord = MockObjects.getCustomerRecord();
+        CustomField mockCustomField = mockCustomerRecord.getCustomField();
+        List<CustomFieldMapping> mockCustomFieldMappingList = MockObjects.getCustomFieldMappingList();
+        CustomField validCustomField = customFieldService.mapCustomFields(mockCustomerRecord, MockObjects.getCustomFieldMap(mockCustomField), mockCustomFieldMappingList);
+        Assertions.assertEquals(mockCustomField, validCustomField);
     }
 
     @Test

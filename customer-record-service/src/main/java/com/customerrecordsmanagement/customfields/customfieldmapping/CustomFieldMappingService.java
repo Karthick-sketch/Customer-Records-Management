@@ -18,6 +18,7 @@ public class CustomFieldMappingService {
     private CustomFieldMappingRepository customFieldMappingRepository;
     private ModelMapper modelMapper;
 
+    // added unit test
     public CustomFieldMapping createCustomFieldMapping(@NonNull CustomFieldMapping customFieldMapping) {
         try {
             return customFieldMappingRepository.save(customFieldMapping);
@@ -26,25 +27,27 @@ public class CustomFieldMappingService {
         }
     }
 
-    public CustomFieldMappingDTO createCustomFieldMapping(CustomFieldMappingDTO customFieldMappingDTO) {
+    // added unit test
+    public CustomFieldMappingDTO createCustomFieldMappingByDTO(CustomFieldMappingDTO customFieldMappingDTO) {
         List<String> fields = CustomField.getFieldNames();
         fetchCustomFieldMappingByAccountId(customFieldMappingDTO.getAccountId())
                 .forEach(customFieldMapping -> fields.remove(customFieldMapping.getFieldName()));
         if (fields.isEmpty()) {
             throw new BadRequestException("Custom field limit exceed");
         }
-        CustomFieldMapping customFieldMapping = convertToCustomFieldMapping(customFieldMappingDTO);
+        CustomFieldMapping customFieldMapping = convertDtoToCustomFieldMapping(customFieldMappingDTO);
         customFieldMapping.setFieldName(fields.get(0));
-        return convertToCustomFieldMappingDTO(createCustomFieldMapping(customFieldMapping));
+        return convertCustomFieldMappingToDTO(createCustomFieldMapping(customFieldMapping));
     }
 
     public List<CustomFieldMapping> fetchCustomFieldMappingByAccountId(long accountId) {
         return customFieldMappingRepository.findByAccountId(accountId);
     }
 
+    // added unit test
     public List<CustomFieldMappingDTO> fetchCustomFieldMappingDTOByAccountId(long accountId) {
         return fetchCustomFieldMappingByAccountId(accountId).stream()
-                .map(this::convertToCustomFieldMappingDTO)
+                .map(this::convertCustomFieldMappingToDTO)
                 .toList();
     }
 
@@ -52,7 +55,7 @@ public class CustomFieldMappingService {
         return customFieldMappingRepository.findCustomFieldNamesByAccountId(accountId);
     }
 
-    public String findColumnNameByCustomFieldName(String columnName, List<CustomFieldMapping> customFieldMappings) {
+    public static String findColumnNameByCustomFieldName(String columnName, List<CustomFieldMapping> customFieldMappings) {
         for (CustomFieldMapping customFieldMapping : customFieldMappings) {
             if (columnName.equals(customFieldMapping.getCustomFieldName())) {
                 return customFieldMapping.getFieldName();
@@ -61,11 +64,11 @@ public class CustomFieldMappingService {
         throw new EntityNotFoundException("There is no custom field called '" + columnName + "'");
     }
 
-    private CustomFieldMapping convertToCustomFieldMapping(CustomFieldMappingDTO customFieldMappingDTO) {
+    private CustomFieldMapping convertDtoToCustomFieldMapping(CustomFieldMappingDTO customFieldMappingDTO) {
         return modelMapper.map(customFieldMappingDTO, CustomFieldMapping.class);
     }
 
-    private CustomFieldMappingDTO convertToCustomFieldMappingDTO(CustomFieldMapping customFieldMapping) {
+    private CustomFieldMappingDTO convertCustomFieldMappingToDTO(CustomFieldMapping customFieldMapping) {
         return modelMapper.map(customFieldMapping, CustomFieldMappingDTO.class);
     }
 }

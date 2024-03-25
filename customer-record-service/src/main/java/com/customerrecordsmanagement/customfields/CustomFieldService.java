@@ -18,25 +18,29 @@ public class CustomFieldService {
     private CustomFieldRepository customFieldRepository;
     private CustomFieldMappingService customFieldMappingService;
 
+    // added unit test
     public CustomField createCustomFieldByCustomField(@NonNull CustomField customField) {
         return customFieldRepository.save(customField);
     }
 
+    // added unit test
     public CustomField createCustomFieldByCustomRecordDTO(CustomerRecordDTO customerRecordDTO) {
         CustomerRecord customerRecord = customerRecordDTO.getCustomerRecord();
         List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(customerRecord.getAccountId());
         return createCustomFieldByCustomField(mapCustomFields(customerRecord, customerRecordDTO.getCustomFields(), customFieldMappings));
     }
 
+    // added unit test
     public CustomField mapCustomFields(CustomerRecord customerRecord, Map<String, String> customFieldMap, List<CustomFieldMapping> customFieldMappings) {
         CustomField customField = new CustomField(customerRecord);
         customFieldMap.forEach((key, value) -> {
-            String field = customFieldMappingService.findColumnNameByCustomFieldName(key, customFieldMappings);
+            String field = CustomFieldMappingService.findColumnNameByCustomFieldName(key, customFieldMappings);
             customField.setField(field, value);
         });
         return customField;
     }
 
+    // added unit test
     public Map<String, String> reverseMapCustomFields(@NonNull CustomField customField) {
         List<CustomFieldMapping> customFieldMappings = customFieldMappingService.fetchCustomFieldMappingByAccountId(customField.getAccountId());
         if (customFieldMappings.isEmpty()) {

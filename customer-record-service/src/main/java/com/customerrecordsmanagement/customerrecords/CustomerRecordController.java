@@ -31,7 +31,7 @@ public class CustomerRecordController {
 
     @PostMapping("/new")
     public ResponseEntity<CustomerRecordDTO> createCustomerRecord(@RequestBody CustomerRecordDTO customerRecordDTO) {
-        return new ResponseEntity<>(customerRecordService.createNewCustomerRecord(customerRecordDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(customerRecordService.createCustomerRecordByDTO(customerRecordDTO), HttpStatus.CREATED);
     }
 
     @PostMapping
