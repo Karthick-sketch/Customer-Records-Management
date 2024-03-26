@@ -2,6 +2,12 @@ package com.customerrecordsmanagement.contactlist;
 
 import com.customerrecordsmanagement.DuplicateEntryException;
 import com.customerrecordsmanagement.EntityNotFoundException;
+import com.customerrecordsmanagement.contactlist.dto.ContactListAddDTO;
+import com.customerrecordsmanagement.contactlist.dto.ContactListDTO;
+import com.customerrecordsmanagement.contactlist.entity.ContactList;
+import com.customerrecordsmanagement.contactlist.entity.ContactListMapping;
+import com.customerrecordsmanagement.contactlist.repository.ContactListMappingRepository;
+import com.customerrecordsmanagement.contactlist.repository.ContactListRepository;
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.CustomerRecordService;
 import lombok.AllArgsConstructor;
@@ -23,6 +29,7 @@ public class ContactListService {
         return contactListRepository.findByAccountId(accountId);
     }
 
+    // added unit test
     public ContactList fetchContactListByIdAndAccountId(long id, long accountId) {
         Optional<ContactList> contactList = contactListRepository.findByIdAndAccountId(id, accountId);
         if (contactList.isEmpty()) {
@@ -48,9 +55,9 @@ public class ContactListService {
         }
     }
 
-    public void createContactListMapping(@NonNull ContactListMapping contactListMapping) {
+    public ContactListMapping createContactListMapping(@NonNull ContactListMapping contactListMapping) {
         try {
-            contactListMappingRepository.save(contactListMapping);
+            return contactListMappingRepository.save(contactListMapping);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateEntryException("The customer record " + contactListMapping.getCustomerRecord().getEmail() + " is already present");
         }

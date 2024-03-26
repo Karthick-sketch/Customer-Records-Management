@@ -1,4 +1,4 @@
-package com.customerrecordsmanagement.contactlist;
+package com.customerrecordsmanagement.contactlist.dto;
 
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import lombok.AllArgsConstructor;

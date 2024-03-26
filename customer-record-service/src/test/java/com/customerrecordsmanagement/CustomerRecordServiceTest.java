@@ -57,9 +57,9 @@ public class CustomerRecordServiceTest {
     public void testCreateCustomerRecord() {
         CustomerRecord mockCustomerRecord = MockObjects.getCustomerRecord();
         Mockito.when(customerRecordRepository.save(mockCustomerRecord)).thenReturn(mockCustomerRecord);
-        CustomerRecord validCustomerRecord = customerRecordService.createCustomerRecord(mockCustomerRecord);
+        CustomerRecord validCustomerRecord = customerRecordService.saveCustomerRecord(mockCustomerRecord);
         Mockito.when(customerRecordRepository.save(mockCustomerRecord)).thenThrow(DataIntegrityViolationException.class);
-        Executable duplicateCustomerRecord = () -> customerRecordService.createCustomerRecord(mockCustomerRecord);
+        Executable duplicateCustomerRecord = () -> customerRecordService.saveCustomerRecord(mockCustomerRecord);
         Assertions.assertEquals(mockCustomerRecord, validCustomerRecord);
         Assertions.assertThrows(DuplicateEntryException.class, duplicateCustomerRecord);
         Mockito.verify(customerRecordRepository, Mockito.times(2)).save(mockCustomerRecord);
@@ -78,7 +78,7 @@ public class CustomerRecordServiceTest {
         Assertions.assertEquals(mockCustomerRecordDTO, validCustomerRecordDTO);
     }
 
-    @Test // need to fix
+    @Test
     public void testUpdateCustomerRecord() {
         long id = 1, accountId = 1;
         CustomerRecord mockCustomerRecord = MockObjects.getCustomerRecord();
@@ -95,7 +95,7 @@ public class CustomerRecordServiceTest {
 
         CustomerRecordDTO actualCustomerRecord = customerRecordService.updateCustomerRecord(id, accountId, MockObjects.getValidCustomerRecordFieldsForUpdate());
         Assertions.assertEquals(expectedCustomerRecordDTO, actualCustomerRecord);
-        Mockito.verify(customerRecordRepository, Mockito.times(2)).save(updatedCustomerRecord);
+        Mockito.verify(customerRecordRepository, Mockito.times(1)).save(updatedCustomerRecord);
     }
 
     @Test

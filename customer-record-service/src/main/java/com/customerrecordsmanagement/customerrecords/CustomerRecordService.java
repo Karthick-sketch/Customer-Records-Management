@@ -44,7 +44,7 @@ public class CustomerRecordService {
 
     public CustomerRecordDTO createCustomerRecordFromMap(String base64, Map<String, String> customerRecordMap) {
         CustomerRecord customerRecord = convertMapToCustomerRecord(decodeBase64Code(base64), customerRecordMap);
-        return convertCustomerRecordToCustomerRecordDTO(createCustomerRecord(customerRecord));
+        return convertCustomerRecordToCustomerRecordDTO(saveCustomerRecord(customerRecord));
     }
 
     public CustomerRecord convertMapToCustomerRecord(long accountId, Map<String, String> stringMap) {
@@ -87,7 +87,7 @@ public class CustomerRecordService {
     }
 
     // added unit test
-    public CustomerRecord createCustomerRecord(@NonNull CustomerRecord customerRecord) {
+    public CustomerRecord saveCustomerRecord(@NonNull CustomerRecord customerRecord) {
         try {
             return customerRecordRepository.save(customerRecord);
         } catch (DataIntegrityViolationException e) {
@@ -100,10 +100,11 @@ public class CustomerRecordService {
     public CustomerRecordDTO createCustomerRecordByDTO(CustomerRecordDTO customerRecordDTO) {
         CustomerRecord customerRecord = customerRecordDTO.getCustomerRecord();
         customerRecord.setCustomField(customFieldService.createCustomFieldByCustomRecordDTO(customerRecordDTO));
-        CustomerRecord createdCustomerRecord = createCustomerRecord(customerRecord);
+        CustomerRecord createdCustomerRecord = saveCustomerRecord(customerRecord);
         return new CustomerRecordDTO(createdCustomerRecord, customFieldService.reverseMapCustomFields(createdCustomerRecord.getCustomField()));
     }
 
+    // added unit test
     public CustomerRecordDTO updateCustomerRecord(long id, long accountId, Map<String, String> customerRecordUpdate) {
         CustomerRecord customerRecord = fetchCustomerRecordByIdAndAccountId(id, accountId);
         BeanWrapperImpl customerRecordBeanWrapper = new BeanWrapperImpl(customerRecord);
@@ -124,7 +125,7 @@ public class CustomerRecordService {
         CustomField updatedCustomField = (CustomField) customFieldBeanWrapper.getWrappedInstance();
         updatedCustomerRecord.setCustomField(updatedCustomField);
 
-        return convertCustomerRecordToCustomerRecordDTO(customerRecordRepository.save(updatedCustomerRecord));
+        return convertCustomerRecordToCustomerRecordDTO(saveCustomerRecord(updatedCustomerRecord));
     }
 
     // added unit test
@@ -151,7 +152,7 @@ public class CustomerRecordService {
         int duplicateRecords = 0;
         for (CustomerRecord customerRecord : customerRecords) {
             try {
-                createCustomerRecord(customerRecord);
+                saveCustomerRecord(customerRecord);
             } catch (DuplicateEntryException e) {
                 duplicateRecords++;
             }

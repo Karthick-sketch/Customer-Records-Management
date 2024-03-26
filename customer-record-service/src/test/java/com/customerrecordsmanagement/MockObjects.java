@@ -1,5 +1,7 @@
 package com.customerrecordsmanagement;
 
+import com.customerrecordsmanagement.contactlist.entity.ContactList;
+import com.customerrecordsmanagement.contactlist.entity.ContactListMapping;
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customfields.CustomField;
 import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMapping;
@@ -95,5 +97,18 @@ public class MockObjects {
 
     public static Map<String, String> getInvalidCustomerRecordFieldsForUpdate() {
         return Map.of("amount", "100.0 INR");
+    }
+
+    public static ContactList getContactList() {
+        ContactList contactList = new ContactList(1L, "contact-list");
+        contactList.setId(1);
+        contactList.setContactListMappings(List.of(getContactListMapping(contactList)));
+        return contactList;
+    }
+
+    public static ContactListMapping getContactListMapping(ContactList contactList) {
+        ContactListMapping contactListMapping = new ContactListMapping(1L, contactList, getCustomerRecord());
+        contactListMapping.setId(1);
+        return contactListMapping;
     }
 }

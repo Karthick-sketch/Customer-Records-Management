@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.customerrecordsmanagement.customfields.CustomField;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.id.IncrementGenerator;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Data
+@EqualsAndHashCode(exclude = {"customField"})
 @Entity(name = "customer_records")
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId", "email"})})
 public class CustomerRecord {

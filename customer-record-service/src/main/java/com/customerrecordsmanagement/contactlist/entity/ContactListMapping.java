@@ -1,4 +1,4 @@
-package com.customerrecordsmanagement.contactlist;
+package com.customerrecordsmanagement.contactlist.entity;
 
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.fasterxml.jackson.annotation.JsonIgnore;

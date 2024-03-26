@@ -1,5 +1,6 @@
-package com.customerrecordsmanagement.contactlist;
+package com.customerrecordsmanagement.contactlist.repository;
 
+import com.customerrecordsmanagement.contactlist.entity.ContactList;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
