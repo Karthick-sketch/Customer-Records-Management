@@ -1,10 +1,13 @@
 package com.customerrecordsmanagement;
 
 import com.customerrecordsmanagement.contactlist.ContactListService;
+import com.customerrecordsmanagement.contactlist.dto.ContactListAddDTO;
+import com.customerrecordsmanagement.contactlist.dto.ContactListDTO;
 import com.customerrecordsmanagement.contactlist.entity.ContactList;
 import com.customerrecordsmanagement.contactlist.entity.ContactListMapping;
 import com.customerrecordsmanagement.contactlist.repository.ContactListMappingRepository;
 import com.customerrecordsmanagement.contactlist.repository.ContactListRepository;
+import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.CustomerRecordService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,6 +19,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,7 +49,19 @@ public class ContactListServiceTest {
         Assertions.assertThrows(EntityNotFoundException.class, invalidAccountId);
     }
 
-    @Test // need to fix
+    @Test
+    public void testFetchCustomerRecordsFromList() {
+        long id = 1, accountId = 1;
+        ContactList mockContactList = MockObjects.getContactList();
+        List<ContactListMapping> mockContactListMappings = mockContactList.getContactListMappings();
+        ContactListDTO mockContactListDTO = MockObjects.getContactListDTO();
+        Mockito.when(contactListRepository.findByIdAndAccountId(id, accountId)).thenReturn(Optional.of(mockContactList));
+        Mockito.when(contactListMappingRepository.findByAccountIdAndContactListId(accountId, id)).thenReturn(mockContactListMappings);
+        ContactListDTO validContactListDTO = contactListService.fetchCustomerRecordsFromList(1, accountId);
+        Assertions.assertEquals(mockContactListDTO, validContactListDTO);
+    }
+
+    @Test
     public void testCreateContactList() {
         ContactList mockContactList = MockObjects.getContactList();
         Mockito.when(contactListRepository.save(mockContactList)).thenReturn(mockContactList);
@@ -56,10 +72,10 @@ public class ContactListServiceTest {
 
         Assertions.assertEquals(mockContactList, validContactList);
         Assertions.assertThrows(DuplicateEntryException.class, duplicateContactList);
-        Mockito.verify(contactListRepository, Mockito.times(1)).save(mockContactList);
+        Mockito.verify(contactListRepository, Mockito.times(2)).save(mockContactList);
     }
 
-    @Test // need to fix
+    @Test
     public void testCreateContactListMapping() {
         ContactListMapping mockContactListMapping = MockObjects.getContactListMapping(MockObjects.getContactList());
         Mockito.when(contactListMappingRepository.save(mockContactListMapping)).thenReturn(mockContactListMapping);
@@ -70,6 +86,21 @@ public class ContactListServiceTest {
 
         Assertions.assertEquals(mockContactListMapping, validContactListMapping);
         Assertions.assertThrows(DuplicateEntryException.class, duplicateContactListMapping);
-        Mockito.verify(contactListMappingRepository, Mockito.times(1)).save(mockContactListMapping);
+        Mockito.verify(contactListMappingRepository, Mockito.times(2)).save(mockContactListMapping);
+    }
+
+    @Test
+    public void testAddCustomerRecordsToList() {
+        long id = 1, accountId = 1;
+        CustomerRecord mockCustomerRecord = MockObjects.getCustomerRecord();
+        ContactList mockContactList = MockObjects.getContactList();
+        ContactListMapping mockContactListMapping = MockObjects.getContactListMapping(mockContactList);
+        ContactListAddDTO mockContactListAddDTO = MockObjects.getContactListAddDTO();
+
+        Mockito.when(contactListRepository.findByIdAndAccountId(id, accountId)).thenReturn(Optional.of(mockContactList));
+        Mockito.when(customerRecordService.fetchCustomerRecordByIdAndAccountId(id, accountId)).thenReturn(mockCustomerRecord);
+        Mockito.when(contactListMappingRepository.save(Mockito.any(ContactListMapping.class))).thenReturn(mockContactListMapping);
+        contactListService.addCustomerRecordsToList(mockContactListAddDTO);
+        Mockito.verify(contactListMappingRepository, Mockito.times(1)).save(Mockito.any(ContactListMapping.class));
     }
 }

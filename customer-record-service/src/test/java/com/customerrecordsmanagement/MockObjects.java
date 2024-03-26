@@ -1,5 +1,7 @@
 package com.customerrecordsmanagement;
 
+import com.customerrecordsmanagement.contactlist.dto.ContactListAddDTO;
+import com.customerrecordsmanagement.contactlist.dto.ContactListDTO;
 import com.customerrecordsmanagement.contactlist.entity.ContactList;
 import com.customerrecordsmanagement.contactlist.entity.ContactListMapping;
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
@@ -101,7 +103,7 @@ public class MockObjects {
 
     public static ContactList getContactList() {
         ContactList contactList = new ContactList(1L, "contact-list");
-        contactList.setId(1);
+        contactList.setId(1L);
         contactList.setContactListMappings(List.of(getContactListMapping(contactList)));
         return contactList;
     }
@@ -110,5 +112,13 @@ public class MockObjects {
         ContactListMapping contactListMapping = new ContactListMapping(1L, contactList, getCustomerRecord());
         contactListMapping.setId(1);
         return contactListMapping;
+    }
+
+    public static ContactListAddDTO getContactListAddDTO() {
+        return new ContactListAddDTO(1L, 1L, List.of(1L));
+    }
+
+    public static ContactListDTO getContactListDTO() {
+        return new ContactListDTO(1L, "contact-list", List.of(getCustomerRecord()));
     }
 }

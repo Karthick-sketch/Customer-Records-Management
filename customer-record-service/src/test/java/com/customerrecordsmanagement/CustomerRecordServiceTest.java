@@ -94,7 +94,9 @@ public class CustomerRecordServiceTest {
         Mockito.when(customFieldService.reverseMapCustomFields(updatedCustomField)).thenReturn(updatedCustomFieldMap);
 
         CustomerRecordDTO actualCustomerRecord = customerRecordService.updateCustomerRecord(id, accountId, MockObjects.getValidCustomerRecordFieldsForUpdate());
+        Executable invalidCustomField = () -> customerRecordService.updateCustomerRecord(id, accountId, MockObjects.getInvalidCustomerRecordFieldsForUpdate());
         Assertions.assertEquals(expectedCustomerRecordDTO, actualCustomerRecord);
+        Assertions.assertThrows(EntityNotFoundException.class, invalidCustomField);
         Mockito.verify(customerRecordRepository, Mockito.times(1)).save(updatedCustomerRecord);
     }
 

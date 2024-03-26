@@ -3,19 +3,17 @@ package com.customerrecordsmanagement.contactlist.entity;
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @RequiredArgsConstructor
 @Entity(name = "contact_list_mapping")
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId", "contact_list_id", "customer_record_id"})})
 public class ContactListMapping {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @NonNull
     private Long accountId;

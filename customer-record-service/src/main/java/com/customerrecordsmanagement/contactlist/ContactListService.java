@@ -38,6 +38,7 @@ public class ContactListService {
         return contactList.get();
     }
 
+    // added unit test
     public ContactListDTO fetchCustomerRecordsFromList(long id, long accountId) {
         ContactList contactList = fetchContactListByIdAndAccountId(id, accountId);
         List<ContactListMapping> contactListMappings = contactListMappingRepository.findByAccountIdAndContactListId(accountId, id);
@@ -47,6 +48,7 @@ public class ContactListService {
         return new ContactListDTO(id, contactList.getListName(), customerRecords);
     }
 
+    // added unit test
     public ContactList createContactList(@NonNull ContactList contactList) {
         try {
             return contactListRepository.save(contactList);
@@ -55,6 +57,7 @@ public class ContactListService {
         }
     }
 
+    // added unit test
     public ContactListMapping createContactListMapping(@NonNull ContactListMapping contactListMapping) {
         try {
             return contactListMappingRepository.save(contactListMapping);
@@ -63,6 +66,7 @@ public class ContactListService {
         }
     }
 
+    // added unit test
     public void addCustomerRecordsToList(ContactListAddDTO contactListAddDTO) {
         long accountId = contactListAddDTO.getAccountId();
         ContactList contactList = fetchContactListByIdAndAccountId(contactListAddDTO.getListId(), accountId);

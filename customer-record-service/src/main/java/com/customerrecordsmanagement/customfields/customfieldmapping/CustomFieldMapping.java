@@ -1,10 +1,12 @@
 package com.customerrecordsmanagement.customfields.customfieldmapping;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @Entity(name = "custom_fields_mapping")
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = {"accountId", "customFieldName"})})

@@ -4,15 +4,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
-@Entity(name = "csv_file_details")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @RequiredArgsConstructor
+@Entity(name = "csv_file_details")
 public class CsvFileDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
