@@ -31,6 +31,7 @@ public class FileUploadStatusService {
         return fileUploadStatusRepository.findByAccountId(accountId);
     }
 
+    // added unit test
     public FileUploadStatus fetchFileUploadStatusByIdAndAccountId(long id, long accountId) {
         Optional<FileUploadStatus> fileUploadStatus = fileUploadStatusRepository.findByIdAndAccountId(id, accountId);
         if (fileUploadStatus.isEmpty()) {
@@ -39,10 +40,12 @@ public class FileUploadStatusService {
         return fileUploadStatus.get();
     }
 
-    public FileUploadStatus createNewFileUploadStatus(long accountId, String fileName) {
-        FileUploadStatus fileUploadStatus = new FileUploadStatus(accountId, fileName);
-        fileUploadStatus.setUploadStart(LocalDateTime.now());
+    public FileUploadStatus saveNewFileUploadStatus(FileUploadStatus fileUploadStatus) {
         return fileUploadStatusRepository.save(fileUploadStatus);
+    }
+
+    public FileUploadStatus createNewFileUploadStatus(long accountId, String fileName) {
+        return saveNewFileUploadStatus(new FileUploadStatus(accountId, fileName));
     }
 
     public void updateFileUploadStatus(long accountId, long fileUploadStatusId, int total, int uploaded, int duplicate, int invalid) {
@@ -51,7 +54,7 @@ public class FileUploadStatusService {
         fileUploadStatus.setUploadedRecords(uploaded);
         fileUploadStatus.setDuplicateRecords(duplicate);
         fileUploadStatus.setInvalidRecords(invalid);
-        fileUploadStatus.setUploadEnd(LocalDateTime.now());
+        fileUploadStatus.setUploadEndTime(LocalDateTime.now());
         fileUploadStatusRepository.save(fileUploadStatus);
     }
 
@@ -62,7 +65,7 @@ public class FileUploadStatusService {
         String filePath = getFilePath(file.getOriginalFilename(), true);
         try (FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
             fileOutputStream.write(file.getBytes());
-            CsvFileDetail csvFileDetail = csvFileDetailService.saveCsvFileDetail(accountId, file.getOriginalFilename(), filePath);
+            CsvFileDetail csvFileDetail = csvFileDetailService.createCsvFileDetail(accountId, file.getOriginalFilename(), filePath);
             FileUploadStatus fileUploadStatus = createNewFileUploadStatus(accountId, csvFileDetail.getFileName());
             fileUploadEventKafkaProducer.publishKafkaMessage(accountId, csvFileDetail.getId(), fileUploadStatus.getId());
             logger.info(file.getOriginalFilename() + " file uploaded");

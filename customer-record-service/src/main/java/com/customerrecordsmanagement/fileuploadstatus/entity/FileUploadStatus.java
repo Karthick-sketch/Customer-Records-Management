@@ -4,27 +4,30 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@RequiredArgsConstructor
 @Entity(name = "file_upload_status")
 public class FileUploadStatus {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @NonNull
-    private Long accountId;
-    @NonNull
+    private long accountId;
     private String fileName;
     private int totalRecords;
     private int uploadedRecords;
     private int duplicateRecords;
     private int invalidRecords;
-    private LocalDateTime uploadStart;
-    private LocalDateTime uploadEnd;
+    private LocalDateTime uploadStartTime;
+    private LocalDateTime uploadEndTime;
+
+    public FileUploadStatus(long accountId, String fileName) {
+        this.accountId = accountId;
+        this.fileName = fileName;
+        this.uploadStartTime = LocalDateTime.now();
+    }
 }

@@ -13,15 +13,21 @@ import java.util.Optional;
 public class CsvFileDetailService {
     private CsvFileDetailRepository csvFileDetailRepository;
 
-    public CsvFileDetail fetchCsvFileDetailById(long id) {
-        Optional<CsvFileDetail> csvFileDetail = csvFileDetailRepository.findById(id);
+    // added unit test
+    public CsvFileDetail fetchCsvFileDetailByIdAndAccountId(long id, long accountId) {
+        Optional<CsvFileDetail> csvFileDetail = csvFileDetailRepository.findByIdAndAccountId(id, accountId);
         if (csvFileDetail.isEmpty()) {
             throw new EntityNotFoundException("file not found");
         }
         return csvFileDetail.get();
     }
 
-    public CsvFileDetail saveCsvFileDetail(long accountId, String fileName, String filePath) {
-        return csvFileDetailRepository.save(new CsvFileDetail(accountId, fileName, filePath));
+    public CsvFileDetail saveCsvFileDetail(CsvFileDetail csvFileDetail) {
+        return csvFileDetailRepository.save(csvFileDetail);
+    }
+
+    // added unit test
+    public CsvFileDetail createCsvFileDetail(long accountId, String fileName, String filePath) {
+        return saveCsvFileDetail(new CsvFileDetail(accountId, fileName, filePath));
     }
 }

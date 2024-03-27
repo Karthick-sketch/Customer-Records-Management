@@ -4,11 +4,14 @@ import com.customerrecordsmanagement.contactlist.dto.ContactListAddDTO;
 import com.customerrecordsmanagement.contactlist.dto.ContactListDTO;
 import com.customerrecordsmanagement.contactlist.entity.ContactList;
 import com.customerrecordsmanagement.contactlist.entity.ContactListMapping;
+import com.customerrecordsmanagement.csvfiledetail.entity.CsvFileDetail;
 import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
 import com.customerrecordsmanagement.customfields.entity.CustomField;
 import com.customerrecordsmanagement.customfields.entity.CustomFieldMapping;
 import com.customerrecordsmanagement.customfields.dto.CustomFieldMappingDTO;
+import com.customerrecordsmanagement.fileuploadstatus.entity.FileUploadStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -120,5 +123,19 @@ public class MockObjects {
 
     public static ContactListDTO getContactListDTO() {
         return new ContactListDTO(1L, "contact-list", List.of(getCustomerRecord()));
+    }
+
+    public static CsvFileDetail getCsvFileDetail() {
+        return new CsvFileDetail(1L, "customer-records.csv", "src/main/resources/customer-records.csv");
+    }
+
+    public static FileUploadStatus getFileUploadStatus() {
+        FileUploadStatus fileUploadStatus = new FileUploadStatus(1, "customer-records.csv");
+        fileUploadStatus.setTotalRecords(10);
+        fileUploadStatus.setUploadedRecords(10);
+        fileUploadStatus.setDuplicateRecords(10);
+        fileUploadStatus.setDuplicateRecords(10);
+        fileUploadStatus.setUploadEndTime(LocalDateTime.now().plusSeconds(1));
+        return fileUploadStatus;
     }
 }

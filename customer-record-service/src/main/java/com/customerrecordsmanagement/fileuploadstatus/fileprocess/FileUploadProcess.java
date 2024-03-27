@@ -31,7 +31,7 @@ public class FileUploadProcess {
     private final Logger logger = Logger.getLogger(FileUploadProcess.class.getName());
 
     public void pushCustomerRecordsFromFileToDatabase(long accountId, long fileId, long fileUploadStatusId) {
-        CsvFileDetail csvFileDetail = csvFileDetailService.fetchCsvFileDetailById(fileId);
+        CsvFileDetail csvFileDetail = csvFileDetailService.fetchCsvFileDetailByIdAndAccountId(fileId, accountId);
         List<String[]> csvRecords = readCsvFile(csvFileDetail.getFilePath());
         if (csvRecords != null) {
             createAllCustomerRecordsAndFileUploadStatus(accountId, csvRecords, fileUploadStatusId);
