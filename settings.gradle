@@ -1,4 +1,4 @@
 rootProject.name = 'customer-records-management'
-include('main', 'common', 'customer-record-service', 'exception-handlers', 'kafka-service')
+include('common', 'customer-record-service', 'exception-handlers', 'kafka-service')
 
 // dependency resolution manager

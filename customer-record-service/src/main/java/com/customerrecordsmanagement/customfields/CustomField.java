@@ -4,9 +4,8 @@ import com.customerrecordsmanagement.EntityNotFoundException;
 import com.customerrecordsmanagement.customerrecords.CustomerRecord;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.id.IncrementGenerator;
@@ -18,8 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @ToString(exclude = {"customerRecord"})
 @Entity(name = "custom_fields")
