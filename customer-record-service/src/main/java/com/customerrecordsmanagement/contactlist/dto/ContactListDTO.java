@@ -1,6 +1,6 @@
 package com.customerrecordsmanagement.contactlist.dto;
 
-import com.customerrecordsmanagement.customerrecords.CustomerRecord;
+import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

@@ -1,7 +1,7 @@
 package com.customerrecordsmanagement.config;
 
-import com.customerrecordsmanagement.customerrecords.CustomerRecord;
-import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMapping;
+import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
+import com.customerrecordsmanagement.customfields.entity.CustomFieldMapping;
 import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.batch.item.file.transform.FieldExtractor;

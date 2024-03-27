@@ -1,9 +1,9 @@
 package com.customerrecordsmanagement.config;
 
-import com.customerrecordsmanagement.customerrecords.CustomerRecord;
-import com.customerrecordsmanagement.customerrecords.CustomerRecordRepository;
-import com.customerrecordsmanagement.customerrecords.CustomerRecordService;
-import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
+import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
+import com.customerrecordsmanagement.customerrecords.repository.CustomerRecordRepository;
+import com.customerrecordsmanagement.customerrecords.service.CustomerRecordService;
+import com.customerrecordsmanagement.customfields.service.CustomFieldMappingService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;

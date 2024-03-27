@@ -1,7 +1,7 @@
 package com.customerrecordsmanagement.config;
 
-import com.customerrecordsmanagement.customerrecords.CustomerRecord;
-import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
+import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
+import com.customerrecordsmanagement.customfields.service.CustomFieldMappingService;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.Step;

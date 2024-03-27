@@ -1,6 +1,6 @@
 package com.customerrecordsmanagement.contactlist.entity;
 
-import com.customerrecordsmanagement.customerrecords.CustomerRecord;
+import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

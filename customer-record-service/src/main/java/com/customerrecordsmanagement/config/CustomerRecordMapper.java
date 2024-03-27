@@ -1,7 +1,7 @@
 package com.customerrecordsmanagement.config;
 
-import com.customerrecordsmanagement.customerrecords.CustomerRecord;
-import com.customerrecordsmanagement.customfields.CustomField;
+import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
+import com.customerrecordsmanagement.customfields.entity.CustomField;
 import lombok.NonNull;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;

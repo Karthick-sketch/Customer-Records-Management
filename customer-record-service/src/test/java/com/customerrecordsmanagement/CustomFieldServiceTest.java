@@ -1,12 +1,12 @@
 package com.customerrecordsmanagement;
 
-import com.customerrecordsmanagement.customerrecords.CustomerRecord;
-import com.customerrecordsmanagement.customerrecords.CustomerRecordDTO;
-import com.customerrecordsmanagement.customfields.CustomField;
-import com.customerrecordsmanagement.customfields.CustomFieldRepository;
-import com.customerrecordsmanagement.customfields.CustomFieldService;
-import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMapping;
-import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingService;
+import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
+import com.customerrecordsmanagement.customerrecords.dto.CustomerRecordDTO;
+import com.customerrecordsmanagement.customfields.entity.CustomField;
+import com.customerrecordsmanagement.customfields.repository.CustomFieldRepository;
+import com.customerrecordsmanagement.customfields.service.CustomFieldService;
+import com.customerrecordsmanagement.customfields.entity.CustomFieldMapping;
+import com.customerrecordsmanagement.customfields.service.CustomFieldMappingService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

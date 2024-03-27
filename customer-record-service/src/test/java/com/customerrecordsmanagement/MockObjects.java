@@ -4,10 +4,10 @@ import com.customerrecordsmanagement.contactlist.dto.ContactListAddDTO;
 import com.customerrecordsmanagement.contactlist.dto.ContactListDTO;
 import com.customerrecordsmanagement.contactlist.entity.ContactList;
 import com.customerrecordsmanagement.contactlist.entity.ContactListMapping;
-import com.customerrecordsmanagement.customerrecords.CustomerRecord;
-import com.customerrecordsmanagement.customfields.CustomField;
-import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMapping;
-import com.customerrecordsmanagement.customfields.customfieldmapping.CustomFieldMappingDTO;
+import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
+import com.customerrecordsmanagement.customfields.entity.CustomField;
+import com.customerrecordsmanagement.customfields.entity.CustomFieldMapping;
+import com.customerrecordsmanagement.customfields.dto.CustomFieldMappingDTO;
 
 import java.util.List;
 import java.util.Map;

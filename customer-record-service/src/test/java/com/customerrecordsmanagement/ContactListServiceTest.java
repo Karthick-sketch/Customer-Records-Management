@@ -1,14 +1,14 @@
 package com.customerrecordsmanagement;
 
-import com.customerrecordsmanagement.contactlist.ContactListService;
+import com.customerrecordsmanagement.contactlist.service.ContactListService;
 import com.customerrecordsmanagement.contactlist.dto.ContactListAddDTO;
 import com.customerrecordsmanagement.contactlist.dto.ContactListDTO;
 import com.customerrecordsmanagement.contactlist.entity.ContactList;
 import com.customerrecordsmanagement.contactlist.entity.ContactListMapping;
 import com.customerrecordsmanagement.contactlist.repository.ContactListMappingRepository;
 import com.customerrecordsmanagement.contactlist.repository.ContactListRepository;
-import com.customerrecordsmanagement.customerrecords.CustomerRecord;
-import com.customerrecordsmanagement.customerrecords.CustomerRecordService;
+import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
+import com.customerrecordsmanagement.customerrecords.service.CustomerRecordService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
