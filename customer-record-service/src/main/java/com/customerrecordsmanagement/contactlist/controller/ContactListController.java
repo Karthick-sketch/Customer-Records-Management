@@ -11,18 +11,19 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(value = "http://localhost:5173/")
 @RestController
 @RequestMapping("/lists")
 @AllArgsConstructor
 public class ContactListController {
     private ContactListService contactListService;
 
-    @GetMapping("/accountId/{accountId}")
+    @GetMapping("/account/{accountId}")
     public ResponseEntity<List<ContactList>> getContactLists(@PathVariable long accountId) {
         return new ResponseEntity<>(contactListService.fetchContactListByAccountId(accountId), HttpStatus.OK);
     }
 
-    @GetMapping("/accountId/{accountId}/id/{id}")
+    @GetMapping("/account/{accountId}/id/{id}")
     public ResponseEntity<ContactListDTO> getCustomerRecordsFromList(@PathVariable long accountId, @PathVariable long id) {
         return new ResponseEntity<>(contactListService.fetchCustomerRecordsFromList(id, accountId), HttpStatus.OK);
     }

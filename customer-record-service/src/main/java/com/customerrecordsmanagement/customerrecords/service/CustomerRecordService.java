@@ -19,11 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -42,7 +40,16 @@ public class CustomerRecordService {
     public long decodeBase64Code(String base64Code) {
         Base64.Decoder decoder = Base64.getDecoder();
         String decodedAccountId = new String(decoder.decode(base64Code));
-        return Long.parseLong(decodedAccountId.substring(decodedAccountId.indexOf("=")));
+//        return Long.parseLong(decodedAccountId.substring(decodedAccountId.indexOf("accountId=")));
+        return Long.parseLong(decodedAccountId);
+    }
+
+    public List<String> getCustomerRecordAndCustomFieldNames(long accountId) {
+        List<String> customerRecordFieldNames = Stream.concat(CustomerRecord.getFields().stream(),
+                    customFieldMappingService.fetchCustomFieldNamesByAccountId(accountId).stream()
+                ).collect(Collectors.toCollection(ArrayList::new));
+        customerRecordFieldNames.remove("accountId");
+        return customerRecordFieldNames;
     }
 
     public CustomerRecordDTO createCustomerRecordFromMap(String base64, Map<String, String> customerRecordMap) {
@@ -87,6 +94,12 @@ public class CustomerRecordService {
 
     public CustomerRecordDTO convertCustomerRecordToCustomerRecordDTO(CustomerRecord customerRecord) {
         return new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord.getCustomField()));
+    }
+
+    public List<CustomerRecordDTO> fetchCustomerRecordBySearchQuery(long accountId, String searchQuery) {
+        return customerRecordRepository.findByAccountIdAndSearchQuery(accountId, searchQuery).stream()
+                .map(this::convertCustomerRecordToCustomerRecordDTO)
+                .toList();
     }
 
     // added unit test

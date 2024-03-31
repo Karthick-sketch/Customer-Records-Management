@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@CrossOrigin(value = "http://localhost:5173/")
 @RestController
 @AllArgsConstructor
 @RequestMapping("/custom-fields")

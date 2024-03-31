@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@CrossOrigin(value = "http://localhost:5173/")
 @RestController
 @RequestMapping("/customer-records")
 @AllArgsConstructor
@@ -24,6 +25,16 @@ public class CustomerRecordController {
     @GetMapping("/account/{accountId}")
     public ResponseEntity<List<CustomerRecordDTO>> getCustomerRecordsWithPagination(@PathVariable long accountId, @RequestParam int pageNumber, int pageSize) {
         return new ResponseEntity<>(customerRecordService.fetchCustomerRecords(accountId, pageNumber-1, pageSize), HttpStatus.OK);
+    }
+
+    @GetMapping("/fields/account/{accountId}")
+    public ResponseEntity<List<String>> getCustomerRecordFields(@PathVariable long accountId) {
+        return new ResponseEntity<>(customerRecordService.getCustomerRecordAndCustomFieldNames(accountId), HttpStatus.OK);
+    }
+
+    @GetMapping("/account/{accountId}/search")
+    public ResponseEntity<List<CustomerRecordDTO>> getCustomerRecordBySearchQuery(@PathVariable long accountId, @RequestParam("q") String searchQuery) {
+        return new ResponseEntity<>(customerRecordService.fetchCustomerRecordBySearchQuery(accountId, searchQuery), HttpStatus.OK);
     }
 
     @GetMapping("/account/{accountId}/id/{id}")
