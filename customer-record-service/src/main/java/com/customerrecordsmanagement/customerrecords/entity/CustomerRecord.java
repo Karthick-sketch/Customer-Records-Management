@@ -26,15 +26,15 @@ public class CustomerRecord {
     private long accountId;
     @Column(nullable = false)
     private String email;
-    private String firstName;
-    private String lastName;
-    private String phoneNumber;
-    private String companyName;
-    private String address;
-    private String city;
-    private String state;
-    private String country;
-    private String zipcode;
+    private String firstName = "";
+    private String lastName = "";
+    private String phoneNumber = "";
+    private String companyName = "";
+    private String address = "";
+    private String city = "";
+    private String state = "";
+    private String country = "";
+    private String zipcode = "";
     @JsonIgnore
     @OneToOne(mappedBy = "customerRecord", cascade = CascadeType.ALL)
     private CustomField customField;

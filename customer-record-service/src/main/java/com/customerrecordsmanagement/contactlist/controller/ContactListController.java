@@ -29,7 +29,7 @@ public class ContactListController {
     }
 
     @PostMapping
-    public ResponseEntity<ContactList> getContactLists(@RequestBody ContactList contactList) {
+    public ResponseEntity<ContactList> createContactList(@RequestBody ContactList contactList) {
         return new ResponseEntity<>(contactListService.createContactList(contactList), HttpStatus.OK);
     }
 

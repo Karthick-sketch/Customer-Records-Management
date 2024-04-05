@@ -28,16 +28,16 @@ public class CustomField {
     @GenericGenerator(name = "sequence", type = IncrementGenerator.class)
     private long id;
     private long accountId;
-    private String field1;
-    private String field2;
-    private String field3;
-    private String field4;
-    private String field5;
-    private String field6;
-    private String field7;
-    private String field8;
-    private String field9;
-    private String field10;
+    private String field1 = "";
+    private String field2 = "";
+    private String field3 = "";
+    private String field4 = "";
+    private String field5 = "";
+    private String field6 = "";
+    private String field7 = "";
+    private String field8 = "";
+    private String field9 = "";
+    private String field10 = "";
     @JsonIgnore
     @OneToOne
     @JoinColumn(name = "customer_record_id", referencedColumnName = "id")
@@ -74,7 +74,8 @@ public class CustomField {
         throwIfFieldIsNull(field, fieldName);
         try {
             field.setAccessible(true);
-            return (String) field.get(this);
+            String value = (String) field.get(this);
+            return value == null ? "" : value;
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e.getMessage());
         }

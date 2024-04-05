@@ -12,4 +12,5 @@ public class CustomFieldMappingDTO {
     private long accountId;
     private String customFieldName;
     private String dataType;
+    private boolean required;
 }

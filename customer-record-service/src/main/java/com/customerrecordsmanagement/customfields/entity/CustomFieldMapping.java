@@ -16,4 +16,5 @@ public class CustomFieldMapping {
     private String fieldName;
     private String customFieldName;
     private String dataType;
+    private boolean required;
 }
