@@ -3,6 +3,7 @@ package com.customerrecordsmanagement.customerrecords.service;
 import com.customerrecordsmanagement.DuplicateEntryException;
 import com.customerrecordsmanagement.EntityNotFoundException;
 import com.customerrecordsmanagement.customerrecords.dto.CustomerRecordDTO;
+import com.customerrecordsmanagement.customerrecords.dto.ContactEmailDTO;
 import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.repository.CustomerRecordRepository;
 import com.customerrecordsmanagement.customfields.entity.CustomField;
@@ -77,6 +78,10 @@ public class CustomerRecordService {
         return customerRecordRepository.findByAccountId(accountId, PageRequest.of(pageNumber, pageSize)).stream()
                 .map(customerRecord -> new CustomerRecordDTO(customerRecord, customFieldService.reverseMapCustomFields(customerRecord.getCustomField())))
                 .toList();
+    }
+
+    public List<ContactEmailDTO> fetchContactEmailsByAccountId(long accountId) {
+        return customerRecordRepository.findEmailsByAccountId(accountId);
     }
 
     // added unit test

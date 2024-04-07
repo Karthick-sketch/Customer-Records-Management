@@ -4,6 +4,7 @@ import com.customerrecordsmanagement.contactlist.service.ContactListService;
 import com.customerrecordsmanagement.contactlist.dto.ContactListAddDTO;
 import com.customerrecordsmanagement.contactlist.dto.ContactListDTO;
 import com.customerrecordsmanagement.contactlist.entity.ContactList;
+import com.customerrecordsmanagement.customerrecords.dto.ContactEmailDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,11 @@ import java.util.List;
 @AllArgsConstructor
 public class ContactListController {
     private ContactListService contactListService;
+
+    @GetMapping("/account/{accountId}/id/{listId}/contacts")
+    public ResponseEntity<List<ContactEmailDTO>> getContactEmails(@PathVariable long accountId, @PathVariable Long listId) {
+        return new ResponseEntity<>(contactListService.fetchContactEmailsByAccountIdAndListId(accountId, listId), HttpStatus.OK);
+    }
 
     @GetMapping("/account/{accountId}")
     public ResponseEntity<List<ContactList>> getContactLists(@PathVariable long accountId) {

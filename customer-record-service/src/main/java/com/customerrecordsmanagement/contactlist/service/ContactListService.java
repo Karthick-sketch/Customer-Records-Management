@@ -8,6 +8,7 @@ import com.customerrecordsmanagement.contactlist.entity.ContactList;
 import com.customerrecordsmanagement.contactlist.entity.ContactListMapping;
 import com.customerrecordsmanagement.contactlist.repository.ContactListMappingRepository;
 import com.customerrecordsmanagement.contactlist.repository.ContactListRepository;
+import com.customerrecordsmanagement.customerrecords.dto.ContactEmailDTO;
 import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.service.CustomerRecordService;
 import lombok.AllArgsConstructor;
@@ -39,13 +40,20 @@ public class ContactListService {
     }
 
     // added unit test
-    public ContactListDTO fetchCustomerRecordsFromList(long id, long accountId) {
-        ContactList contactList = fetchContactListByIdAndAccountId(id, accountId);
-        List<ContactListMapping> contactListMappings = contactListMappingRepository.findByAccountIdAndContactListId(accountId, id);
+    public ContactListDTO fetchCustomerRecordsFromList(long listId, long accountId) {
+        ContactList contactList = fetchContactListByIdAndAccountId(listId, accountId);
+        List<ContactListMapping> contactListMappings = contactListMappingRepository.findByAccountIdAndContactListId(accountId, listId);
         List<CustomerRecord> customerRecords = contactListMappings.stream()
                 .map(ContactListMapping::getCustomerRecord)
                 .toList();
-        return new ContactListDTO(id, contactList.getListName(), customerRecords);
+        return new ContactListDTO(listId, contactList.getListName(), customerRecords);
+    }
+
+    public List<ContactEmailDTO> fetchContactEmailsByAccountIdAndListId(long accountId, long listId) {
+        List<Long> customerRecordIDs = contactListMappingRepository.findCustomerRecordIDsByAccountIdAndListId(accountId, listId);
+        return customerRecordService.fetchContactEmailsByAccountId(accountId).stream()
+                .filter(contactEmailDTO -> !customerRecordIDs.contains(contactEmailDTO.getId()))
+                .toList();
     }
 
     // added unit test
