@@ -19,6 +19,7 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@CrossOrigin(value = "http://localhost:5173/")
 @RestController
 @RequestMapping("/upload-status/account/{accountId}")
 public class FileUploadStatusController {

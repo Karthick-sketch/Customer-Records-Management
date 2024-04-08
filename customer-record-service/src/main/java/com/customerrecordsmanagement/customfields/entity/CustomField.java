@@ -61,7 +61,7 @@ public class CustomField {
         throwIfFieldIsNull(field, fieldName);
         try {
             field.setAccessible(true);
-            if (field.get(this) == null) {
+            if (field.get(this) == null || field.get(this).toString().isEmpty()) {
                 field.set(this, value);
             }
         } catch (IllegalAccessException e) {

@@ -15,6 +15,6 @@ public class CustomFieldMapping {
     private Long accountId;
     private String fieldName;
     private String customFieldName;
-    private String dataType;
-    private boolean required;
+    private String dataType = "text";
+    private boolean required = false;
 }
