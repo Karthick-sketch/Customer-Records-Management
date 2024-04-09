@@ -1,5 +1,6 @@
 package com.customerrecordsmanagement.fileuploadstatus.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,7 +25,9 @@ public class FileUploadStatus {
     private int uploadedRecords;
     private int duplicateRecords;
     private int invalidRecords;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private LocalDateTime uploadStartTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private LocalDateTime uploadEndTime;
 
     public FileUploadStatus(long accountId, String fileName) {

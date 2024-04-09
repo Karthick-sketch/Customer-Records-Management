@@ -46,7 +46,7 @@ public class FileUploadStatusController {
     }
 
     @GetMapping("/id/{id}")
-    public ResponseEntity<FileUploadStatus> getFileUploadStatusById(@PathVariable long accountId, long id) {
+    public ResponseEntity<FileUploadStatus> getFileUploadStatusById(@PathVariable long accountId, @PathVariable long id) {
         return new ResponseEntity<>(fileUploadStatusService.fetchFileUploadStatusByIdAndAccountId(id, accountId), HttpStatus.OK);
     }
 
