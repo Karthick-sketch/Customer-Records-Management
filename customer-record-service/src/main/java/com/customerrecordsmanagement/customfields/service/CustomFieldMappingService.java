@@ -66,6 +66,7 @@ public class CustomFieldMappingService {
             throw new BadRequestException("Custom field limit exceed");
         }
         CustomFieldMapping customFieldMapping = convertMapToCustomFieldMapping(new CustomFieldMapping(), customFieldMappingMap);
+        customFieldMapping.setAccountId(accountId);
         customFieldMapping.setFieldName(fields.get(0));
         return convertCustomFieldMappingToDTO(saveCustomFieldMapping(customFieldMapping));
     }
