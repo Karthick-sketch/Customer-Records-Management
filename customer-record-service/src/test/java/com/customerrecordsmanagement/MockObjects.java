@@ -73,6 +73,7 @@ public class MockObjects {
         customFieldMapping.setFieldName("field" + id);
         customFieldMapping.setCustomFieldName("cf" + id);
         customFieldMapping.setDataType("text");
+        customFieldMapping.setRequired(true);
         return customFieldMapping;
     }
 
@@ -86,7 +87,12 @@ public class MockObjects {
         customFieldMappingDTO.setAccountId(1L);
         customFieldMappingDTO.setCustomFieldName("cf" + id);
         customFieldMappingDTO.setDataType("text");
+        customFieldMappingDTO.setRequired(true);
         return customFieldMappingDTO;
+    }
+
+    public static Map<String, String> getCustomFieldMappingMap() {
+        return Map.of("customFieldName", "cf1", "dataType",  "text", "required", "true");
     }
 
     public static CustomerRecord getUpdatedCustomerRecord() {
@@ -102,6 +108,31 @@ public class MockObjects {
 
     public static Map<String, String> getInvalidCustomerRecordFieldsForUpdate() {
         return Map.of("amount", "100.0 INR");
+    }
+
+    public static CustomFieldMapping getUpdatedCustomFieldMapping(long id) {
+        CustomFieldMapping customFieldMapping = getCustomFieldMapping(id);
+        customFieldMapping.setFieldName("field1");
+        customFieldMapping.setCustomFieldName("custom-field-1");
+        customFieldMapping.setDataType("number");
+        customFieldMapping.setRequired(false);
+        return customFieldMapping;
+    }
+
+    public static CustomFieldMappingDTO getUpdatedCustomFieldMappingDTO(long id) {
+        CustomFieldMappingDTO customFieldMappingDTO = getCustomFieldMappingDTO(id);
+        customFieldMappingDTO.setCustomFieldName("custom-field-1");
+        customFieldMappingDTO.setDataType("number");
+        customFieldMappingDTO.setRequired(false);
+        return customFieldMappingDTO;
+    }
+
+    public static Map<String, String> getValidCustomFieldMappingForUpdate() {
+        return Map.of("customFieldName", "custom-field-1", "dataType", "number", "required", "false");
+    }
+
+    public static Map<String, String> getInvalidCustomFieldMappingForUpdate() {
+        return Map.of("custom_field_mapping", "custom-field-1", "data_type", "number", "required", "false");
     }
 
     public static ContactList getContactList() {
@@ -126,7 +157,9 @@ public class MockObjects {
     }
 
     public static CsvFileDetail getCsvFileDetail() {
-        return new CsvFileDetail(1L, "customer-records.csv", "src/main/resources/customer-records.csv");
+        CsvFileDetail csvFileDetail = new CsvFileDetail(1L, "customer-records.csv", "src/main/resources/customer-records.csv");
+        csvFileDetail.setId(1);
+        return csvFileDetail;
     }
 
     public static FileUploadStatus getFileUploadStatus() {

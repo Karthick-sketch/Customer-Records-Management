@@ -39,6 +39,7 @@ public class CustomFieldMappingService {
         return customFieldMappingRepository.findCustomFieldNamesByAccountId(accountId);
     }
 
+    // added unit test
     public CustomFieldMapping fetchCustomFieldMappingByIdAndAccountId(long id, long accountId) {
         Optional<CustomFieldMapping> customFieldMapping = customFieldMappingRepository.findByIdAndAccountId(id, accountId);
         if (customFieldMapping.isEmpty()) {
@@ -69,6 +70,7 @@ public class CustomFieldMappingService {
         return convertCustomFieldMappingToDTO(saveCustomFieldMapping(customFieldMapping));
     }
 
+    // added unit test
     public CustomFieldMappingDTO updateCustomField(long id, long accountId, Map<String, String> customFieldMappingMap) {
         CustomFieldMapping originalCustomFieldMapping = fetchCustomFieldMappingByIdAndAccountId(id, accountId);
         CustomFieldMapping updatedCustomFieldMapping = convertMapToCustomFieldMapping(originalCustomFieldMapping, customFieldMappingMap);
@@ -76,6 +78,7 @@ public class CustomFieldMappingService {
         return convertCustomFieldMappingToDTO(saveCustomFieldMapping(updatedCustomFieldMapping));
     }
 
+    // added unit test
     public void deleteCustomField(long id, long accountId) {
         CustomFieldMapping customFieldMapping = fetchCustomFieldMappingByIdAndAccountId(id, accountId);
         customFieldMappingRepository.delete(customFieldMapping);

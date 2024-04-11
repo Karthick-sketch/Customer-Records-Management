@@ -39,9 +39,9 @@ public class CsvFileDetailServiceTest {
     @Test
     public void testCreateCsvFileDetail() {
         CsvFileDetail mockCsvFileDetail = MockObjects.getCsvFileDetail();
-        Mockito.when(csvFileDetailRepository.save(mockCsvFileDetail)).thenReturn(mockCsvFileDetail);
+        Mockito.when(csvFileDetailRepository.save(Mockito.any(CsvFileDetail.class))).thenReturn(mockCsvFileDetail);
         CsvFileDetail validCsvFileDetail = csvFileDetailService.createCsvFileDetail(mockCsvFileDetail.getAccountId(), mockCsvFileDetail.getFileName(), mockCsvFileDetail.getFilePath());
         Assertions.assertEquals(mockCsvFileDetail, validCsvFileDetail);
-        Mockito.verify(csvFileDetailRepository, Mockito.times(1)).save(mockCsvFileDetail);
+        Mockito.verify(csvFileDetailRepository, Mockito.times(1)).save(Mockito.any(CsvFileDetail.class));
     }
 }
