@@ -27,11 +27,6 @@ public class CustomerRecordController {
         return new ResponseEntity<>(customerRecordService.fetchCustomerRecords(accountId, pageNumber-1, pageSize), HttpStatus.OK);
     }
 
-    @GetMapping("/fields/account/{accountId}")
-    public ResponseEntity<List<String>> getCustomerRecordFields(@PathVariable long accountId) {
-        return new ResponseEntity<>(customerRecordService.getCustomerRecordAndCustomFieldNames(accountId), HttpStatus.OK);
-    }
-
     @GetMapping("/account/{accountId}/search")
     public ResponseEntity<List<CustomerRecordDTO>> getCustomerRecordBySearchQuery(@PathVariable long accountId, @RequestParam("q") String searchQuery) {
         return new ResponseEntity<>(customerRecordService.fetchCustomerRecordBySearchQuery(accountId, searchQuery), HttpStatus.OK);
