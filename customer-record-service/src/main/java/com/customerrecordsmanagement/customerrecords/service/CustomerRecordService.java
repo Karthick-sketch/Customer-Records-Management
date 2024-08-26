@@ -6,6 +6,7 @@ import com.customerrecordsmanagement.customerrecords.dto.CustomerRecordDTO;
 import com.customerrecordsmanagement.customerrecords.dto.ContactEmailDTO;
 import com.customerrecordsmanagement.customerrecords.entity.CustomerRecord;
 import com.customerrecordsmanagement.customerrecords.repository.CustomerRecordRepository;
+import com.customerrecordsmanagement.customerrecords.specification.CustomerRecordSpecification;
 import com.customerrecordsmanagement.customfields.entity.CustomField;
 import com.customerrecordsmanagement.customfields.entity.CustomFieldMapping;
 import com.customerrecordsmanagement.customfields.service.CustomFieldMappingService;
@@ -93,8 +94,8 @@ public class CustomerRecordService {
     }
 
     public List<CustomerRecordDTO> fetchCustomerRecordBySearchQuery(long accountId, String searchQuery) {
-        return customerRecordRepository.findByAccountIdAndSearchQuery(accountId, searchQuery).stream()
-                .map(this::convertCustomerRecordToCustomerRecordDTO)
+        return customerRecordRepository.findAll(CustomerRecordSpecification.withAccountIdAndSearchQuery(accountId, searchQuery))
+                .stream().map(this::convertCustomerRecordToCustomerRecordDTO)
                 .toList();
     }
 
